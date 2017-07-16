@@ -1,0 +1,9 @@
+
+#plot '../datas/be_distrib_short.data' title "BE"
+plot '../datas/cran_distrib_short.data' title "CRAN"
+replot '../datas/answers_distrib_short.data' title "ANSWERS"
+
+
+set term postscript color solid
+set output '| ps2pdf - ../gnuplot/distrib_short.pdf'
+replot
