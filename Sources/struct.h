@@ -6,6 +6,7 @@ typedef struct packet{
 typedef struct queue{
 	int size;
 	int* queue;
+	int* kind;
 	int min_id;
 	int max_id;
 }Queue ;

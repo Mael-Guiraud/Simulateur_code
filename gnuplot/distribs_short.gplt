@@ -1,6 +1,6 @@
 
-#plot '../datas/be_distrib_short.data' title "BE"
-plot '../datas/cran_distrib_short.data' title "CRAN"
+plot '../datas/be_distrib_short.data' title "BE"
+replot '../datas/cran_distrib_short.data' title "CRAN"
 replot '../datas/answers_distrib_short.data' title "ANSWERS"
 
 

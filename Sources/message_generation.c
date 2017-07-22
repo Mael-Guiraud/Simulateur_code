@@ -82,6 +82,7 @@ void generation_BE(Queue * BE_Q, int nb_nodes,float burst_proba, float lambda_bu
 		for(int j=0;j<number_generated;j++)
 		{	
 			BE_Q[i].queue[BE_Q[i].max_id] = current_slot; 
+			BE_Q[i].kind[BE_Q[i].max_id] = 1; 
 			BE_Q[i].max_id= (BE_Q[i].max_id+1)%max_size;
 		}
 	}
@@ -98,6 +99,7 @@ void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_ant
 			{
 				CRAN_Q[i].size += size_CRAN;
 				CRAN_Q[i].queue[CRAN_Q[i].max_id] = current_slot; 	
+				CRAN_Q[i].kind[CRAN_Q[i].max_id] = 2; 	
 				CRAN_Q[i].max_id= (CRAN_Q[i].max_id+1)%max_size;
 				if(DEBUG)printf("Creating C_RAN on queue %d at date %d (max id = %d)\n ",i,current_slot,CRAN_Q[i].max_id);
 			}
@@ -119,6 +121,8 @@ void generation_answers(Packet* ring, int* nodes_positions, Queue* CRAN_Q, int n
 				for(int j=0;j<ring[reading_slot].nb_CRAN/size_CRAN;j++)
 				{
 					CRAN_Q[i].queue[CRAN_Q[i].max_id] = current_slot; 
+					CRAN_Q[i].kind[CRAN_Q[i].max_id] = 3; 
+
 					CRAN_Q[i].max_id= (CRAN_Q[i].max_id+1)%max_size;
 					if(DEBUG)printf("Creating Answer to %d on queue %d at date %d  (max id = %d)\n ",ring[reading_slot].owner,i,current_slot,CRAN_Q[i].max_id);
 				}
@@ -131,9 +135,12 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 	int writing_Slot;
 	int gap;
 	int inserted = 0;
+	int packet_created_size;
+
 	for(int i=0;i<nb_nodes;i++)
 	{
 		writing_Slot = nodes_positions[i];
+		packet_created_size = 0;
 		if(ring[writing_Slot].owner == -1) //IF the slot is free
 		{
 			switch(mode)
@@ -248,15 +255,62 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 					}
 				break;
 				default:
-					printf("This policy hasn't been implemented yet \n");
-					exit(21);
+					if(CRAN_Q[i].size>=minimal_buffer_size)
+					{
+						inserted++;
+						ring[writing_Slot].owner = i;
+						packet_created_size = 0;
+
+						while((CRAN_Q[i].size>0) && (packet_created_size < packet_size))
+						{
+
+							if(CRAN_Q[i].kind[CRAN_Q[i].min_id] == 1)
+							{
+								if(packet_created_size <= packet_size- size_BE)
+								{
+									if(current_slot>time_before_measure)	
+										fprintf(f_BE,"%d\n",current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]);
+									CRAN_Q[i].queue[CRAN_Q[i].min_id] = -1;
+									CRAN_Q[i].kind[CRAN_Q[i].min_id] = -1;
+									CRAN_Q[i].min_id= (CRAN_Q[i].min_id+1)%max_size;
+									CRAN_Q[i].size -= size_BE;
+									packet_created_size += size_BE;
+								}
+								else
+								{
+
+									break;
+								}
+							}
+							else
+							{
+								if(packet_created_size <= packet_size- size_CRAN)
+								{
+									if(current_slot>time_before_measure)
+									{
+										if(CRAN_Q[i].kind[CRAN_Q[i].min_id] == 2)
+											fprintf(f_CRAN,"%d\n",current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]);
+										else
+											fprintf(f_ANSWERS,"%d\n",current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]);
+									}	
+
+									CRAN_Q[i].queue[CRAN_Q[i].min_id] = -1;
+									CRAN_Q[i].kind[CRAN_Q[i].min_id] = -1;
+									CRAN_Q[i].min_id= (CRAN_Q[i].min_id+1)%max_size;
+									CRAN_Q[i].size -= size_CRAN;
+									packet_created_size += size_CRAN;
+									ring[writing_Slot].nb_CRAN += size_CRAN;
+								}
+								else
+								{
+									if(DEBUG)printf("Sending of a packet of size : %d\n", packet_created_size);
+									break;
+								}
+							}
+						}
+					}
 				break;
 			}
-		}
-		else
-		{
-			if(CRAN_Q[i].size > 0)
-				if(DEBUG)printf("%d wants to insert %d but the slot is taken \n",i,CRAN_Q[i].size);
 		}
 	}
 	return inserted;
@@ -272,7 +326,7 @@ void remove_packets(int* nodes_positions, Packet* ring, int nb_nodes,int ring_si
 		{
 			if(DEBUG)printf("Nodes %d removes his packet\n",i);
 			ring[reading_slot].owner = -1;
-			ring[reading_slot].nb_CRAN = -1;
+			ring[reading_slot].nb_CRAN = 0;
 		}
 	}
 }
