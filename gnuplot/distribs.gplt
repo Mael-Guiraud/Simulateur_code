@@ -1,18 +1,6 @@
-
-stat "../datas/be_distrib.data"
-
-a = STATS_records
-stat "../datas/cran_distrib.data"
-b = STATS_records
-stat "../datas/answers_distrib.data"
-c = STATS_records
-plot '../datas/be_distrib.data' u 1:(1./a) smooth frequency title "BE"
-print a 
-print b 
-print c
-replot '../datas/cran_distrib.data' u 1:(1./b) smooth frequency title "CRAN"
-
-replot '../datas/answers_distrib.data' u 1:(1./c) smooth frequency title "ANSWERS"
+plot '../datas/be_distrib.data' title "BE" 
+replot '../datas/cran_distrib.data' title "CRAN" 
+replot '../datas/answers_distrib.data' title "ANSWERS"
 set term postscript color solid
-set output '| ps2pdf - ../gnuplot/distrib.pdf'
+set output '| ps2pdf - ../gnuplot/not_loaded_prio.pdf'
 replot
