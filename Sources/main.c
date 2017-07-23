@@ -49,11 +49,13 @@ int main()
 	float * tab_ANSWERS;
 	assert(tab_ANSWERS = (float*)calloc(table_size,sizeof(float)));
 
+
 	for(int i=0;i<nb_simuls;i++	)
 	{
 		fprintf(stdout,"\r Step %d/%d",i+1,nb_simuls);fflush(stdout);
 		simulate(ring_size,nb_nodes,nb_antenas,period,burst_proba,lambda_burst,lambda_regular,minimal_buffer_size,nb_BBU,size_CRAN,size_BE,packet_size,mode,simulation_lenght,time_before_measure, max_size,tab_BE,tab_CRAN,tab_ANSWERS,table_size);
 	}
+
 	printf("\n");
 
 	

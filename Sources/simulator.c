@@ -110,7 +110,7 @@ void simulate(int ring_size, int nb_nodes,int nb_antenas, int period, float burs
 		remove_packets(nodes_positions,ring,nb_nodes,ring_size);
 		rotate_ring(ring,ring_size);
 	}
-	if(!DEBUG)printf("\n Real Load = %f\n",load/simulation_lenght);
+	if(DEBUG)printf("\n Real Load = %f\n",load/simulation_lenght);
 
 	free(ring);
 	free(nodes_positions);
