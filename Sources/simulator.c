@@ -77,7 +77,7 @@ void aff_queues(Queue* BE_Q,Queue* CRAN_Q, int nb_nodes)
 	}
 }
 
-void simulate(int ring_size, int nb_nodes,int nb_antenas, int period, float burst_proba,float lambda_burst,float lambda_regular,int minimal_buffer_size,int nb_BBU,int size_CRAN,int size_BE,int packet_size, Policy mode, int simulation_lenght,int time_before_measure, int max_size,float * tab_BE,float* tab_CRAN,float* tab_ANSWERS, int tab_size)
+void simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minimal_buffer_size,int nb_BBU,int size_CRAN,int size_BE,int packet_size, Policy mode, int simulation_lenght,int time_before_measure, int max_size,float * tab_BE,float* tab_CRAN,float* tab_ANSWERS, int tab_size , float *** vectors,float ** chain, int* state)
 {
 	Packet* ring = init_ring(ring_size);
 	int * nodes_positions = init_nodes_positions(nb_nodes,ring_size);
@@ -90,16 +90,16 @@ void simulate(int ring_size, int nb_nodes,int nb_antenas, int period, float burs
 	for(int current_slot=0;current_slot<simulation_lenght;current_slot++)
 	{
 		if(DEBUG)aff_queues(BE_Q, CRAN_Q,nb_nodes);
+
+		generation_BE(BE_Q,nb_nodes,size_BE,current_slot,max_size,vectors,chain,state);
 		switch(mode)
 		{
 			case CRAN_FIRST:
-				generation_BE(BE_Q,nb_nodes,burst_proba,lambda_burst,lambda_regular,size_BE,current_slot,max_size);
 				generation_CRAN(CRAN_Q,nodes_antenas,nb_nodes,nb_antenas,current_slot,size_CRAN,nb_BBU,period,max_size);
 				generation_answers(ring,nodes_positions,CRAN_Q,nb_BBU,ring_size,current_slot, size_CRAN,max_size);
 				load += (float)insert_packets(BE_Q,CRAN_Q,ring,nodes_positions,packet_size,minimal_buffer_size,mode,nb_nodes,size_CRAN,size_BE,max_size,current_slot,nb_BBU,tab_BE,tab_CRAN,tab_ANSWERS, time_before_measure,tab_size);
 			break;
 			default:
-				generation_BE(BE_Q,nb_nodes,burst_proba,lambda_burst,lambda_regular,size_BE,current_slot,max_size);
 				generation_CRAN(BE_Q,nodes_antenas,nb_nodes,nb_antenas,current_slot,size_CRAN,nb_BBU,period,max_size);
 				generation_answers(ring,nodes_positions,BE_Q,nb_BBU,ring_size,current_slot, size_CRAN,max_size);
 				load += (float)insert_packets(BE_Q,BE_Q,ring,nodes_positions,packet_size,minimal_buffer_size,mode,nb_nodes,size_CRAN,size_BE,max_size,current_slot,nb_BBU,tab_BE,tab_CRAN,tab_ANSWERS, time_before_measure,tab_size);

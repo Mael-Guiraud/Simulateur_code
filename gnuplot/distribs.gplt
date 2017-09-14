@@ -1,6 +1,6 @@
 plot '../datas/be_distrib.data' title "BE" 
-replot '../datas/cran_distrib.data' title "CRAN" 
-replot '../datas/answers_distrib.data' title "ANSWERS"
+replot '../datas/cran_distrib.data' title "Uplink" 
+replot '../datas/answers_distrib.data' title "Downlink"
 set term postscript color solid
-set output '| ps2pdf - ../gnuplot/not_loaded_prio.pdf'
+set output '| ps2pdf - ../gnuplot/loaded_prio.pdf'
 replot

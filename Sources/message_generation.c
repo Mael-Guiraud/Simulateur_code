@@ -5,40 +5,9 @@
 
 
 #include "struct.h"
+#include "sbbp.h"
 
-int poisson_distribution(float random_drawed, float lambda)
-{
-	double proba = exp (- lambda);
-	int x = 0;
-	double cumul = proba;
-	while (random_drawed > cumul)
-	{
-		x++;
-		proba *=lambda/x;
-		cumul += proba;
-		if(cumul > 0.9999999)//optimisation to avoid computing too long
-			return x;
-	} 
-	if(DEBUG)printf("Poisson distribution return value :%d\n",x);
-	return x;
-}
-int hyper_expo(float burst_proba, float lambda_burst,float lambda_regular)
-{
-	float random = ((float)rand() / RAND_MAX );
-	if(DEBUG)printf("Random for hyper_expo:%f\n",random);
-	if (random < burst_proba)
-	{
-		random = ((float)rand() / RAND_MAX );
-		if(DEBUG)printf("Burst generation.\n");
-		return poisson_distribution(random,lambda_burst);
-	}
-	else											//lambda petit
-	{
-		random = ((float)rand() / RAND_MAX );
-		if(DEBUG)printf("Normal flow generation.\n");
-		return poisson_distribution(random,lambda_regular);
-	}
-}
+
 
 //Init the sending slot of the antenas for a node
 void init_CRAN(int* antenas,int period, int nb_antenas)
@@ -71,13 +40,15 @@ void free_nodes_antenas(int ** nodes, int nb_nodes,int nb_BBU)
 	free(nodes);
 }
 
-void generation_BE(Queue * BE_Q, int nb_nodes,float burst_proba, float lambda_burst, float lambda_regular,int size_BE, int current_slot, int max_size)
+void generation_BE(Queue * BE_Q, int nb_nodes,int size_BE, int current_slot, int max_size, float *** vectors,float ** chain, int* state)
 {
 	int number_generated;
+
+	*state= change_state(chain, *state);
 	for(int i=0;i<nb_nodes;i++)
 	{
 		if(DEBUG)printf("BE messages generation at node %d.\n",i);
-		number_generated = hyper_expo(burst_proba,lambda_burst,lambda_regular);
+		number_generated = sbbp_generation(vectors, *state);
 		BE_Q[i].size += (number_generated*size_BE); 
 		for(int j=0;j<number_generated;j++)
 		{	

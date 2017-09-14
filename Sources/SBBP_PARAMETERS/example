@@ -1,0 +1,12 @@
+##### The file parameters must have the following content 
+[      ]
+[      ]   #A Matrix representing the markov chain for the SBBP
+X #The size of the probablility vector for the first state
+value proba # On each line, the value to draw with it's probablility
+value proba
+value proba
+Y
+value proba
+value proba
+
+#enter one probablilty vector for each state in the chain. The vectors aren't forced to have the same size.
