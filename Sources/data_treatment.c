@@ -22,12 +22,12 @@ int max(int a, int b)
 	return a>b?a:b;
 }
 
-void write_files(float* tab_BE,float * tab_CRAN, float* tab_ANSWERS, int table_size)
+void write_files(float* tab_BE,float * tab_CRAN, float* tab_ANSWERS,float* tab_BE_BBU, int table_size)
 {
 	int id = id_max_divide(tab_BE,table_size);
 	id = max(id,id_max_divide(tab_CRAN,table_size));
 	id = max(id,id_max_divide(tab_ANSWERS,table_size));
-
+	id = max(id,id_max_divide(tab_BE_BBU,table_size));
 
 	FILE* f_CRAN = fopen("../datas/cran_distrib.data","w");
 	if(!f_CRAN){perror("Opening \"../datas/cran_distrib.data\" failure\n");exit(2);}
@@ -35,6 +35,8 @@ void write_files(float* tab_BE,float * tab_CRAN, float* tab_ANSWERS, int table_s
 	if(!f_BE){perror("Opening \"../datas/be_distrib.data\" failure\n");exit(2);}
 	FILE* f_ANSWERS = fopen("../datas/answers_distrib.data","w");		
 	if(!f_ANSWERS){perror("Opening \"../datas/answers_distrib.data\" failure\n");exit(2);}
+	FILE* f_BE_BBU = fopen("../datas/be_bbu_distrib.data","w");		
+	if(!f_BE_BBU){perror("Opening \"../datas/be_bbu_distrib.data\" failure\n");exit(2);}
 
 	for(int i=0;i<id;i++)
 	{
@@ -44,10 +46,13 @@ void write_files(float* tab_BE,float * tab_CRAN, float* tab_ANSWERS, int table_s
 			fprintf(f_CRAN,"%d %f\n",i,tab_CRAN[i]);
 		if(tab_ANSWERS[i])
 			fprintf(f_ANSWERS,"%d %f\n",i,tab_ANSWERS[i]);
+		if(tab_BE_BBU[i])
+			fprintf(f_BE_BBU,"%d %f\n",i,tab_BE_BBU[i]);
 	}
 	fclose(f_CRAN);
 	fclose(f_ANSWERS);
 	fclose(f_BE);
+	fclose(f_BE_BBU);
 }
 
 void print_gnuplot(char * name)
@@ -56,7 +61,7 @@ void print_gnuplot(char * name)
 	FILE* f_GPLT = fopen("../gnuplot/distribs.gplt","w");
 	if(!f_GPLT){perror("Opening gplt file failure\n");exit(2);}
 
-	fprintf(f_GPLT,"plot '../datas/be_distrib.data' title \"BE\" \nreplot '../datas/cran_distrib.data' title \"Uplink\" \nreplot '../datas/answers_distrib.data' title \"Downlink\"\nset term postscript color solid\nset output '| ps2pdf - %s'\nreplot\n",name);
+	fprintf(f_GPLT,"plot '../datas/be_distrib.data' title \"BE\" \nreplot '../datas/be_bbu_distrib.data' title \"BBU BE\" \nreplot '../datas/cran_distrib.data' title \"Uplink\" \nreplot '../datas/answers_distrib.data' title \"Downlink\"\nset term postscript color solid\nset output '| ps2pdf - %s'\nreplot\n",name);
 	fclose(f_GPLT);
 
 }

@@ -101,7 +101,7 @@ void generation_answers(Packet* ring, int* nodes_positions, Queue* CRAN_Q, int n
 		}
 	}
 }
-int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positions,int packet_size, int minimal_buffer_size, Policy mode, int nb_nodes, int size_CRAN, int size_BE, int max_size,int current_slot,int nb_BBU, float* tab_BE,float * tab_CRAN, float* tab_ANSWERS,int time_before_measure,int table_Size)
+int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positions,int packet_size, int minimal_buffer_size, Policy mode, int nb_nodes, int size_CRAN, int size_BE, int max_size,int current_slot,int nb_BBU, float* tab_BE,float * tab_CRAN, float* tab_ANSWERS,float * tab_BE_BBU,int time_before_measure,int table_Size)
 {
 	int writing_Slot;
 	int gap;
@@ -129,30 +129,17 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 							{
 								if(current_slot>time_before_measure)
 								{
-									if(i<nb_BBU)
+									if(current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id] < table_Size)
 									{
-										//fprintf(f_ANSWERS,"%d %d\n",i,current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]);
-										if(current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id] < table_Size)
-										{
+										if(i<nb_BBU)
 											tab_ANSWERS[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
-										}
 										else
-										{
-											printf("Warning : The table to save the datas is too short\n");
-										}
-									} 
+											tab_CRAN[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
+									}
 									else
 									{
-										//fprintf(f_CRAN,"%d %d\n",i,current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]);
-										if(current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id] < table_Size)
-										{
-											tab_CRAN[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
-										}
-										else
-										{
-											printf("Warning : The table to save the datas is too short\n");
-										}
-									}
+										printf("Warning : The table to save the datas is too short\n");
+									}									
 								}
 								CRAN_Q[i].queue[CRAN_Q[i].min_id] = -1;
 								CRAN_Q[i].min_id= (CRAN_Q[i].min_id+1)%max_size;
@@ -177,7 +164,10 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 									{
 										if(current_slot-BE_Q[i].queue[BE_Q[i].min_id] < table_Size)
 										{
-											tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
+											if(i<nb_BBU)
+												tab_BE_BBU[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
+											else
+												tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
 										}
 										else
 										{
@@ -197,29 +187,17 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 							{
 								if(current_slot>time_before_measure)
 								{
-									if(i<nb_BBU)
+									//fprintf(f_ANSWERS,"%d %d\n",i,current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]);										
+									if(current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id] < table_Size)
 									{
-										//fprintf(f_ANSWERS,"%d %d\n",i,current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]);										
-										if(current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id] < table_Size)
-										{
+										if(i<nb_BBU)
 											tab_ANSWERS[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
-										}
 										else
-										{
-											printf("Warning : The table to save the datas is too short\n");
-										}
+											tab_CRAN[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
 									}
 									else
 									{
-										//fprintf(f_CRAN,"%d %d\n",i,current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]);
-										if(current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id] < table_Size)
-										{
-											tab_CRAN[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
-										}
-										else
-										{
-											printf("Warning : The table to save the datas is too short\n");
-										}
+										printf("Warning : The table to save the datas is too short\n");
 									}
 								}
 								CRAN_Q[i].queue[CRAN_Q[i].min_id] = -1;
@@ -248,7 +226,10 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 										//fprintf(f_BE,"%d\n",current_slot-BE_Q[i].queue[BE_Q[i].min_id]);
 										if(current_slot-BE_Q[i].queue[BE_Q[i].min_id] < table_Size)
 										{
-											tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
+											if(i<nb_BBU)
+												tab_BE_BBU[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
+											else
+												tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
 										}
 										else
 										{
@@ -269,7 +250,10 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 										//fprintf(f_BE,"%d\n",current_slot-BE_Q[i].queue[BE_Q[i].min_id]);
 										if(current_slot-BE_Q[i].queue[BE_Q[i].min_id] < table_Size)
 										{
-											tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
+											if(i<nb_BBU)
+												tab_BE_BBU[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
+											else
+												tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
 										}
 										else
 										{
@@ -304,7 +288,10 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 										//fprintf(f_BE,"%d\n",current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]);
 										if(current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id] < table_Size)
 										{
-											tab_BE[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
+											if(i<nb_BBU)
+												tab_BE_BBU[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
+											else
+												tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
 										}
 										else
 										{

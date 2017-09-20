@@ -25,8 +25,8 @@ int main()
 	int size_CRAN = 500;
 	int size_BE = 5;
 	int packet_size = 1000;
-	//Policy mode = NO_MANAGMENT;
-	Policy mode = CRAN_FIRST;
+	Policy mode = NO_MANAGMENT;
+	//Policy mode = CRAN_FIRST;
 	int simulation_lenght = 5000;
 
 	int nb_simuls= 100;
@@ -44,7 +44,7 @@ int main()
 	int table_size = 500; //Upgrade this value if the programs answers that the table to save the datas is too short
 
 	char name[64];
-	sprintf(name,"../gnuplot/loaded_prio.pdf"); // name of the output pdf
+	sprintf(name,"../gnuplot/loaded_no_gestion.pdf"); // name of the output pdf
 
 
 	//Results storage
@@ -54,23 +54,26 @@ int main()
 	assert(tab_BE = (float*)calloc(table_size,sizeof(float)));
 	float * tab_ANSWERS;
 	assert(tab_ANSWERS = (float*)calloc(table_size,sizeof(float)));
+	float * tab_BE_BBU;
+	assert(tab_BE_BBU = (float*)calloc(table_size,sizeof(float)));
 
 
 	for(int i=0;i<nb_simuls;i++	)
 	{
 		fprintf(stdout,"\r Step %d/%d",i+1,nb_simuls);fflush(stdout);
-		simulate(ring_size,nb_nodes,nb_antenas,period,minimal_buffer_size,nb_BBU,size_CRAN,size_BE,packet_size,mode,simulation_lenght,time_before_measure, max_size,tab_BE,tab_CRAN,tab_ANSWERS,table_size,vectors,chain,&state);
+		simulate(ring_size,nb_nodes,nb_antenas,period,minimal_buffer_size,nb_BBU,size_CRAN,size_BE,packet_size,mode,simulation_lenght,time_before_measure, max_size,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU,table_size,vectors,chain,&state);
 	}
 
 	printf("\n");
 
 	
-	write_files(tab_BE,tab_CRAN, tab_ANSWERS, table_size);
+	write_files(tab_BE,tab_CRAN, tab_ANSWERS,tab_BE_BBU, table_size);
 
 	print_gnuplot(name);
 
 	free(tab_ANSWERS);
 	free(tab_BE);
+	free(tab_BE_BBU);
 	free(tab_CRAN);
 	
 	return 0;
