@@ -16,17 +16,21 @@ int main()
 	int nb_nodes=5;
 	int nb_BBU=1;
 
-	int nb_antenas=75;
+	int nb_antenas=1;
 	int period=1000;
+
+	int emission_time = 500;
+	int emission_gap = 10;
 
 	int max_size = 1000000; // buffer max of the queues
 
 	int minimal_buffer_size = 700;
-	int size_CRAN = 500;
+	int size_CRAN = 999;
 	int size_BE = 5;
 	int packet_size = 1000;
-	Policy mode = NO_MANAGMENT;
-	//Policy mode = CRAN_FIRST;
+
+	//Policy mode = NO_MANAGMENT;
+	Policy mode = CRAN_FIRST;
 	int simulation_lenght = 5000;
 
 	int nb_simuls= 100;
@@ -41,7 +45,7 @@ int main()
 	read_SBBP_file(chain,vectors,nb_states);
 
 	
-	int table_size = 500; //Upgrade this value if the programs answers that the table to save the datas is too short
+	int table_size = 50000; //Upgrade this value if the programs answers that the table to save the datas is too short
 
 	char name[64];
 	sprintf(name,"../gnuplot/loaded_no_gestion.pdf"); // name of the output pdf
@@ -61,7 +65,7 @@ int main()
 	for(int i=0;i<nb_simuls;i++	)
 	{
 		fprintf(stdout,"\r Step %d/%d",i+1,nb_simuls);fflush(stdout);
-		simulate(ring_size,nb_nodes,nb_antenas,period,minimal_buffer_size,nb_BBU,size_CRAN,size_BE,packet_size,mode,simulation_lenght,time_before_measure, max_size,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU,table_size,vectors,chain,&state);
+		simulate(ring_size,nb_nodes,nb_antenas,period,minimal_buffer_size,nb_BBU,size_CRAN,size_BE,packet_size,emission_time,emission_gap, mode,simulation_lenght,time_before_measure, max_size,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU,table_size,vectors,chain,&state);
 	}
 
 	printf("\n");

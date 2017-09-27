@@ -60,19 +60,23 @@ void generation_BE(Queue * BE_Q, int nb_nodes,int size_BE, int current_slot, int
 
 }
 
-void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_antenas, int current_slot, int size_CRAN,int nb_BBU, int period, int max_size)
+void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_antenas, int current_slot, int size_CRAN,int nb_BBU, int period, int max_size, int emission_time, int emission_gap)
 {
 	for(int i=nb_BBU;i<nb_nodes;i++)
 	{
 		for(int j=0;j<nb_antenas;j++)
 		{
-			if(nodes_antenas[i][j] == current_slot%period)
+			for(int k=0;k<emission_time;k+=emission_gap)
 			{
-				CRAN_Q[i].size += size_CRAN;
-				CRAN_Q[i].queue[CRAN_Q[i].max_id] = current_slot; 	
-				CRAN_Q[i].kind[CRAN_Q[i].max_id] = 2; 	
-				CRAN_Q[i].max_id= (CRAN_Q[i].max_id+1)%max_size;
-				if(DEBUG)printf("Creating C_RAN on queue %d at date %d (max id = %d)\n ",i,current_slot,CRAN_Q[i].max_id);
+
+				if( (nodes_antenas[i][j]+k)%period == current_slot%period)
+				{
+					CRAN_Q[i].size += size_CRAN;
+					CRAN_Q[i].queue[CRAN_Q[i].max_id] = current_slot; 	
+					CRAN_Q[i].kind[CRAN_Q[i].max_id] = 2; 	
+					CRAN_Q[i].max_id= (CRAN_Q[i].max_id+1)%max_size;
+					if(DEBUG)printf("Creating C_RAN on queue %d at date %d (max id = %d)\n ",i,current_slot,CRAN_Q[i].max_id);
+				}
 			}
 		}
 	}
@@ -302,6 +306,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 									CRAN_Q[i].kind[CRAN_Q[i].min_id] = -1;
 									CRAN_Q[i].min_id= (CRAN_Q[i].min_id+1)%max_size;
 									CRAN_Q[i].size -= size_BE;
+									printf("[%d] \n",CRAN_Q[i].size);
 									packet_created_size += size_BE;
 								}
 								else
@@ -348,6 +353,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 									CRAN_Q[i].size -= size_CRAN;
 									packet_created_size += size_CRAN;
 									ring[writing_Slot].nb_CRAN += size_CRAN;
+									printf("(%d) %d\n",CRAN_Q[i].size,size_CRAN);
 								}
 								else
 								{
