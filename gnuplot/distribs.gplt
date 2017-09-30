@@ -1,7 +1,7 @@
-plot '../datas/be_distrib.data' title "BE" 
-replot '../datas/be_bbu_distrib.data' title "BBU BE" 
-replot '../datas/cran_distrib.data' title "Uplink" 
-replot '../datas/answers_distrib.data' title "Downlink"
+plot '../datas/be_distrib.data' title "BE"  smooth bezier
+replot '../datas/be_bbu_distrib.data' title "BBU BE"  smooth bezier 
+replot '../datas/cran_distrib.data' title "Uplink"  smooth bezier
+replot '../datas/answers_distrib.data' title "Downlink"  smooth bezier
 set term postscript color solid
 set output '| ps2pdf - ../gnuplot/loaded_no_gestion.pdf'
 replot

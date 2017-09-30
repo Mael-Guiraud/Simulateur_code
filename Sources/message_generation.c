@@ -50,12 +50,16 @@ void generation_BE(Queue * BE_Q, int nb_nodes,int size_BE, int current_slot, int
 		if(DEBUG)printf("BE messages generation at node %d.\n",i);
 		number_generated = sbbp_generation(vectors, *state);
 		BE_Q[i].size += (number_generated*size_BE); 
-		for(int j=0;j<number_generated;j++)
-		{	
-			BE_Q[i].queue[BE_Q[i].max_id] = current_slot; 
-			BE_Q[i].kind[BE_Q[i].max_id] = 1; 
-			BE_Q[i].max_id= (BE_Q[i].max_id+1)%max_size;
+		if(size_BE)
+		{
+			for(int j=0;j<number_generated;j++)
+			{	
+				BE_Q[i].queue[BE_Q[i].max_id] = current_slot; 
+				BE_Q[i].kind[BE_Q[i].max_id] = 1; 
+				BE_Q[i].max_id= (BE_Q[i].max_id+1)%max_size;
+			}
 		}
+
 	}
 
 }
@@ -68,7 +72,6 @@ void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_ant
 		{
 			for(int k=0;k<emission_time;k+=emission_gap)
 			{
-
 				if( (nodes_antenas[i][j]+k)%period == current_slot%period)
 				{
 					CRAN_Q[i].size += size_CRAN;
@@ -121,7 +124,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 			switch(mode)
 			{
 				case CRAN_FIRST:
-					if(CRAN_Q[i].size>0)//is there is some CRAN
+					if(CRAN_Q[i].size>0)//if there is some CRAN
 					{
 						inserted++;
 						if(DEBUG)printf("CRAN packet at node %d",i);
@@ -136,9 +139,15 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 									if(current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id] < table_Size)
 									{
 										if(i<nb_BBU)
+										{
 											tab_ANSWERS[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
+											
+										}
 										else
+										{
 											tab_CRAN[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
+											
+										}
 									}
 									else
 									{
@@ -152,7 +161,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 							if(BE_Q[i].size > 0)
 							{
 								if(DEBUG)printf(" with best effort");
-								if( (BE_Q[i].size - packet_size - CRAN_Q[i].size)>0 )
+								if( BE_Q[i].size >  (packet_size - CRAN_Q[i].size) )
 								{
 									gap = packet_size - CRAN_Q[i].size;
 									BE_Q[i].size -= (packet_size - CRAN_Q[i].size);
@@ -169,9 +178,15 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 										if(current_slot-BE_Q[i].queue[BE_Q[i].min_id] < table_Size)
 										{
 											if(i<nb_BBU)
+											{
 												tab_BE_BBU[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
+
+											}
 											else
+											{
 												tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
+
+											}
 										}
 										else
 										{
@@ -185,7 +200,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 							}
 							CRAN_Q[i].size = 0;
 						}
-						else
+						else // on peut virer ca en mettant min(taille paquet, taille file) dans la boucle qui vide cRAn et en faisant attention aux indices
 						{
 							for(int j=0;j<packet_size/size_CRAN;j++)
 							{
@@ -195,9 +210,15 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 									if(current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id] < table_Size)
 									{
 										if(i<nb_BBU)
+										{
 											tab_ANSWERS[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
+											//printf("%d %d %d\n",current_slot,CRAN_Q[i].queue[CRAN_Q[i].min_id],current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]);
+										}
 										else
+										{
 											tab_CRAN[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
+											
+										}
 									}
 									else
 									{
@@ -245,7 +266,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 								}
 								BE_Q[i].size = 0;
 							}
-							else
+							else //peut etre simplifié en prenant le min
 							{
 								for(int j=0;j<packet_size/size_BE;j++)
 								{
@@ -280,9 +301,9 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 						ring[writing_Slot].owner = i;
 						packet_created_size = 0;
 
-						while((CRAN_Q[i].size>0) && (packet_created_size < packet_size))
+						while((CRAN_Q[i].size>0) && (packet_created_size <= packet_size))
 						{
-
+							//printf("***********%d-%d\n",CRAN_Q[i].kind[CRAN_Q[i].min_id],CRAN_Q[i].min_id);
 							if(CRAN_Q[i].kind[CRAN_Q[i].min_id] == 1)
 							{
 								if(packet_created_size <= packet_size- size_BE)
@@ -306,12 +327,11 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 									CRAN_Q[i].kind[CRAN_Q[i].min_id] = -1;
 									CRAN_Q[i].min_id= (CRAN_Q[i].min_id+1)%max_size;
 									CRAN_Q[i].size -= size_BE;
-									printf("[%d] \n",CRAN_Q[i].size);
 									packet_created_size += size_BE;
 								}
 								else
 								{
-
+									//we dont have enough place for a BE 
 									break;
 								}
 							}
@@ -339,6 +359,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 											if(current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id] < table_Size)
 											{
 												tab_ANSWERS[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
+
 											}
 											else
 											{
@@ -353,11 +374,12 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 									CRAN_Q[i].size -= size_CRAN;
 									packet_created_size += size_CRAN;
 									ring[writing_Slot].nb_CRAN += size_CRAN;
-									printf("(%d) %d\n",CRAN_Q[i].size,size_CRAN);
 								}
 								else
 								{
-									if(DEBUG)printf("Sending of a packet of size : %d\n", packet_created_size);
+
+									//not enough place for a CRAN
+									//printf("Sending of a packet of size : %d\n", packet_created_size);
 									break;
 								}
 							}
@@ -378,7 +400,7 @@ void remove_packets(int* nodes_positions, Packet* ring, int nb_nodes,int ring_si
 		reading_slot = (ring_size+nodes_positions[i]-1)%ring_size;
 		if(ring[reading_slot].owner == i)
 		{
-			if(DEBUG)printf("Nodes %d removes his packet\n",i);
+			if(DEBUG)printf("Nodes %d removes its packet\n",i);
 			ring[reading_slot].owner = -1;
 			ring[reading_slot].nb_CRAN = 0;
 		}
