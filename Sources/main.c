@@ -40,9 +40,10 @@ int main()
 	//Generation of best effort parameters
 	int state = 0;
 	int nb_states = 2 ; //depends of the SBBP model
+	int nb_elems[nb_states];
 	float *** vectors = init_vectors(nb_states);
 	float ** chain = init_chain(nb_states);
-	read_SBBP_file(chain,vectors,nb_states);
+	read_SBBP_file(chain,vectors,nb_states,nb_elems);
 
 	
 	int table_size = 50000; //Upgrade this value if the programs answers that the table to save the datas is too short
@@ -81,6 +82,8 @@ int main()
 
 	print_gnuplot(name);
 
+	free_chain(chain,nb_states);
+	free_vectors(vectors,nb_states, nb_elems);
 	free(tab_ANSWERS);
 	free(tab_BE);
 	free(tab_BE_BBU);

@@ -21,7 +21,7 @@ float *** init_vectors(int nb_states)
 	return vectors;
 }
 
-void read_SBBP_file(float ** chain, float *** vectors, int nb_states)
+void read_SBBP_file(float ** chain, float *** vectors, int nb_states, int *nb_elems)
 {
 	FILE* file = fopen("SBBP_PARAMETERS/parameters","r");
 	if(!file){perror("Opening \"/SBBP_PARAMETERS/parameters\" failure\n");exit(2);}
@@ -35,14 +35,13 @@ void read_SBBP_file(float ** chain, float *** vectors, int nb_states)
 		}
 	}
 
-	int nb_elems;
 	//Read the vectors
 	for(int i=0;i<nb_states;i++)
 	{
 		//get the number of elements in the vector
-		fscanf(file,"%d ",&nb_elems);
-		assert(vectors[i]=(float**)malloc(sizeof(float*)*nb_elems));
-		for(int j=0;j<nb_elems;j++)
+		fscanf(file,"%d ",&nb_elems[i]);
+		assert(vectors[i]=(float**)malloc(sizeof(float*)*nb_elems[i]));
+		for(int j=0;j<nb_elems[i];j++)
 		{
 			assert(vectors[i][j]= (float*)malloc(sizeof(float)*2));
 			fscanf(file,"%f %f ",&vectors[i][j][0],&vectors[i][j][1]);
@@ -51,7 +50,27 @@ void read_SBBP_file(float ** chain, float *** vectors, int nb_states)
 	fclose(file);
 }
 
+//free functions
+void free_chain(float ** chain,int nb_states)
+{
+	for(int i=0;i<nb_states;i++)
+		free(chain[i]);
+	free(chain);
+}
 
+void free_vectors(float *** vectors, int nb_states, int* nb_elems)
+{
+	
+	for(int i=0;i<nb_states;i++)
+	{
+		for(int j=0;j<nb_elems[i];j++)
+		{
+			free(vectors[i][j]);
+		}
+		free(vectors[i]);
+	}
+	free(vectors);
+}
 
 //generator functions
 int change_state(float ** chain, int actual_state)
