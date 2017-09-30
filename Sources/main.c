@@ -29,9 +29,9 @@ int main()
 	int size_BE =10;
 	int packet_size = 1000;
 
-	Policy mode = NO_MANAGMENT;
-	//Policy mode = CRAN_FIRST;
-	int simulation_lenght = 10000;
+	//Policy mode = NO_MANAGMENT;
+	Policy mode = CRAN_FIRST;
+	int simulation_lenght = 5000;
 
 	int nb_simuls= 100;
 	int time_before_measure = 2000;
