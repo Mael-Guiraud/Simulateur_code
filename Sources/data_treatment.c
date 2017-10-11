@@ -78,7 +78,7 @@ void print_gnuplot(char * name)
 	FILE* f_GPLT = fopen("../gnuplot/distribs.gplt","w");
 	if(!f_GPLT){perror("Opening gplt file failure\n");exit(2);}
 
-	fprintf(f_GPLT,"plot '../datas/be_distrib.data' title \"BE\"  smooth bezier\nreplot '../datas/be_bbu_distrib.data' title \"BBU BE\"  smooth bezier \nreplot '../datas/cran_distrib.data' title \"Uplink\"  smooth bezier\nreplot '../datas/answers_distrib.data' title \"Downlink\"  smooth bezier\nset term postscript color solid\nset output '| ps2pdf - %s'\nreplot\n",name);
+	fprintf(f_GPLT,"plot '../datas/be_distrib.data' title \"BE\" \nreplot '../datas/be_bbu_distrib.data' title \"BBU BE\" \nreplot '../datas/cran_distrib.data' title \"Uplink\" \nreplot '../datas/answers_distrib.data' title \"Downlink\" \nset term postscript color solid\nset output '| ps2pdf - %s'\nreplot\n",name);
 	fclose(f_GPLT);
 
 }

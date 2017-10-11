@@ -49,7 +49,7 @@ int main()
 	int table_size = 50000; //Upgrade this value if the programs answers that the table to save the datas is too short
 
 	char name[64];
-	sprintf(name,"../gnuplot/loaded_no_gestion.pdf"); // name of the output pdf
+	sprintf(name,"../gnuplot/1_a_no_BE.pdf"); // name of the output pdf
 
 	float Average_load = 0.0;
 	float max_load = 0.0;
