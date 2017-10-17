@@ -22,14 +22,27 @@ void rotate_ring(Packet * ring, int size)
 	ring[0].nb_CRAN = temp.nb_CRAN;
 }
 
-int* init_nodes_positions(int nb_nodes,int size)
+int** init_nodes_positions(int nb_nodes,int size)
 {
 	
-	int* nodes_positions ;
-	assert(nodes_positions = (int*)malloc(sizeof(int)*nb_nodes));
+	int** nodes_positions ;
+	assert(nodes_positions = (int**)malloc(sizeof(int*)*nb_nodes));
+
+	//Allocation
 	for(int i=0;i<nb_nodes;i++)
 	{
-		nodes_positions[i] = i*size/nb_nodes;
+		assert(nodes_positions[i] = (int*)malloc(sizeof(int)*nb_nodes));	
+	}	
+	//Init the values
+	for(int i=0;i<nb_nodes;i++)
+	{
+		nodes_positions[i][i] = 0;	
+		for(int j=i+1;j<nb_nodes;j++)
+		{
+			nodes_positions[i][j] = (j-i) * (size/nb_nodes);
+			nodes_positions[j][i] = size-( (j-i) * (size/nb_nodes));
+		}	
+		
 	}
 	return nodes_positions;
 }
@@ -69,6 +82,15 @@ void free_nodes_queues(Queue * nodes_queues, int nb_nodes)
 	}
 	free(nodes_queues);
 }
+void free_nodes_positions(int ** nodes, int nb_nodes)
+{
+	for(int i=0;i<nb_nodes;i++)
+	{
+		free(nodes[i]);
+		
+	}
+	free(nodes);
+}
 void aff_queues(Queue* BE_Q,Queue* CRAN_Q, int nb_nodes)
 {
 	for(int i=0;i<nb_nodes;i++)
@@ -80,8 +102,8 @@ void aff_queues(Queue* BE_Q,Queue* CRAN_Q, int nb_nodes)
 float simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minimal_buffer_size,int nb_BBU,int size_CRAN,int size_BE,int packet_size, int emission_time, int emission_gap,Policy mode, int simulation_lenght,int time_before_measure, int max_size,float * tab_BE,float* tab_CRAN,float* tab_ANSWERS,float * tab_BE_BBU, int tab_size , float *** vectors,float ** chain, int* state)
 {
 	Packet* ring = init_ring(ring_size);
-	int * nodes_positions = init_nodes_positions(nb_nodes,ring_size);
-	int** nodes_antenas = init_nodes_antenas(nb_nodes,nb_antenas,period,nb_BBU);
+	int ** nodes_positions = init_nodes_positions(nb_nodes,ring_size);
+	int** nodes_antenas = init_nodes_antenas(nb_nodes,nb_antenas,period,nb_BBU,mode);
 	Queue * BE_Q = init_nodes_queues(nb_nodes, max_size);
 	Queue * CRAN_Q = init_nodes_queues(nb_nodes, max_size);
 
@@ -117,7 +139,7 @@ float simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minima
 	if(DEBUG)printf("\n Real Load = %f\n",load/simulation_lenght);
 
 	free(ring);
-	free(nodes_positions);
+	free_nodes_positions(nodes_positions,nb_nodes);
 	free_nodes_antenas(nodes_antenas,nb_nodes,nb_BBU);
 	free_nodes_queues(BE_Q, nb_nodes);
 	free_nodes_queues(CRAN_Q, nb_nodes);

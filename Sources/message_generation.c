@@ -14,16 +14,24 @@ int min(int a, int b)
 
 
 //Init the sending slot of the antenas for a node
-void init_CRAN(int* antenas,int period, int nb_antenas)
+void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode)
 {
 	for(int i=0;i<nb_antenas;i++)
 	{
-		antenas[i]= rand()%period;
-		if(DEBUG)printf("Generation of a random offset(%d) for antena %d.\n",antenas[i],i);
+		if(mode == RESERVATION1)
+		{
+			antenas[i] = (i*2-1) -3 ; // (i*2-1) is the sequence of messages in the BBU [_1_2_3_4....]
+		}
+		else
+		{
+			antenas[i]= rand()%period;
+		}
+		
+		
 	}
 }
 
-int ** init_nodes_antenas(int nb_nodes, int nb_antenas, int period, int nb_BBU)
+int ** init_nodes_antenas(int nb_nodes, int nb_antenas, int period, int nb_BBU,Policy mode )
 {
 	int ** nodes;
 	assert(nodes = (int **)malloc(sizeof(int*)*nb_nodes));
@@ -32,7 +40,7 @@ int ** init_nodes_antenas(int nb_nodes, int nb_antenas, int period, int nb_BBU)
 	{
 		if(DEBUG)printf("Antenas generation at node %d:\n",i);
 		assert(nodes[i]=(int*)malloc(sizeof(int)*nb_antenas));
-		init_CRAN(nodes[i],period,nb_antenas);
+		init_CRAN(nodes[i],period,nb_antenas,mode);
 	}
 	return nodes;
 }
@@ -89,12 +97,12 @@ void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_ant
 	}
 }
 
-void generation_answers(Packet* ring, int* nodes_positions, Queue* CRAN_Q, int nb_BBU, int ring_size, int current_slot, int size_CRAN,int max_size)
+void generation_answers(Packet* ring, int** nodes_positions, Queue* CRAN_Q, int nb_BBU, int ring_size, int current_slot, int size_CRAN,int max_size)
 {
 	int reading_slot;
 	for(int i=0;i<nb_BBU;i++)
 	{
-		reading_slot = (ring_size+nodes_positions[i]-1)%ring_size;
+		reading_slot = (ring_size+nodes_positions[0][i]-1)%ring_size;
 		if(ring[reading_slot].owner >= nb_BBU )
 		{
 			if(ring[reading_slot].nb_CRAN > 0)
@@ -112,7 +120,7 @@ void generation_answers(Packet* ring, int* nodes_positions, Queue* CRAN_Q, int n
 		}
 	}
 }
-int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positions,int packet_size, int minimal_buffer_size, Policy mode, int nb_nodes, int size_CRAN, int size_BE, int max_size,int current_slot,int nb_BBU, float* tab_BE,float * tab_CRAN, float* tab_ANSWERS,float * tab_BE_BBU,int time_before_measure,int table_Size)
+int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positions,int packet_size, int minimal_buffer_size, Policy mode, int nb_nodes, int size_CRAN, int size_BE, int max_size,int current_slot,int nb_BBU, float* tab_BE,float * tab_CRAN, float* tab_ANSWERS,float * tab_BE_BBU,int time_before_measure,int table_Size)
 {
 	int writing_Slot;
 	int gap;
@@ -123,7 +131,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 
 	for(int i=0;i<nb_nodes;i++)
 	{
-		writing_Slot = nodes_positions[i];
+		writing_Slot = nodes_positions[0][i];
 		packet_created_size = 0;
 		if(ring[writing_Slot].owner == -1) //IF the slot is free
 		{
@@ -340,12 +348,12 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int* nodes_positio
 	return inserted;
 }
 
-void remove_packets(int* nodes_positions, Packet* ring, int nb_nodes,int ring_size)
+void remove_packets(int** nodes_positions, Packet* ring, int nb_nodes,int ring_size)
 {
 	int reading_slot;
 	for(int i=0;i<nb_nodes;i++)
 	{
-		reading_slot = (ring_size+nodes_positions[i]-1)%ring_size;
+		reading_slot = (ring_size+nodes_positions[0][i]-1)%ring_size;
 		if(ring[reading_slot].owner == i)
 		{
 			if(DEBUG)printf("Nodes %d removes its packet\n",i);
