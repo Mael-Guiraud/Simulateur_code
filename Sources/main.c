@@ -26,7 +26,7 @@ int main()
 
 	int minimal_buffer_size = 700;
 	int size_CRAN = 1000;
-	int size_BE =0 ;
+	int size_BE =10 ;
 	int packet_size = 1000;
 
 	Policy mode = NO_MANAGMENT;
