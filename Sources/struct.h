@@ -1,6 +1,7 @@
 typedef struct packet{
 	int owner;
 	int nb_CRAN;
+	int reserved_for;
 } Packet;
 
 typedef struct queue{

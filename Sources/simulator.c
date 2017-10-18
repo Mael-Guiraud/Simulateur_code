@@ -13,13 +13,16 @@ void rotate_ring(Packet * ring, int size)
 	Packet temp;
 	temp.owner = ring[size-1].owner;
 	temp.nb_CRAN = ring[size-1].nb_CRAN;
+	temp.reserved_for = ring[size-1].reserved_for;
 	for(int i=size-1;i>0;i--)
 	{
 		ring[i].owner = ring[i-1].owner;
 		ring[i].nb_CRAN = ring[i-1].nb_CRAN;
+		ring[i].reserved_for = ring[i-1].reserved_for;
 	}
 	ring[0].owner = temp.owner;
 	ring[0].nb_CRAN = temp.nb_CRAN;
+	ring[0].reserved_for = temp.reserved_for;
 }
 
 int** init_nodes_positions(int nb_nodes,int size)
@@ -55,6 +58,7 @@ Packet* init_ring(int size)
 	{
 		ring[i].owner = -1;
 		ring[i].nb_CRAN = 0;
+		ring[i].reserved_for = -1;
 	}
 	return ring;
 }
@@ -103,7 +107,7 @@ float simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minima
 {
 	Packet* ring = init_ring(ring_size);
 	int ** nodes_positions = init_nodes_positions(nb_nodes,ring_size);
-	int** nodes_antenas = init_nodes_antenas(nb_nodes,nb_antenas,period,nb_BBU,mode);
+	int** nodes_antenas = init_nodes_antenas(nb_nodes,nb_antenas,period,nb_BBU,mode,nodes_positions);
 	Queue * BE_Q = init_nodes_queues(nb_nodes, max_size);
 	Queue * CRAN_Q = init_nodes_queues(nb_nodes, max_size);
 
@@ -118,13 +122,13 @@ float simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minima
 		switch(mode)
 		{
 			case CRAN_FIRST:
-				generation_CRAN(CRAN_Q,nodes_antenas,nb_nodes,nb_antenas,current_slot,size_CRAN,nb_BBU,period,max_size,emission_time,emission_gap);
+				generation_CRAN(CRAN_Q,nodes_antenas,nb_nodes,nb_antenas,current_slot,size_CRAN,nb_BBU,period,max_size,emission_time,emission_gap,mode,ring,nodes_positions);
 				generation_answers(ring,nodes_positions,CRAN_Q,nb_BBU,ring_size,current_slot, size_CRAN,max_size);
 				load += (float)insert_packets(BE_Q,CRAN_Q,ring,nodes_positions,packet_size,minimal_buffer_size,mode,nb_nodes,size_CRAN,size_BE,max_size,current_slot,nb_BBU,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU ,time_before_measure,tab_size);
 			break;
 			default:
 			//printf("before cran\n");aff_queues(BE_Q, CRAN_Q,nb_nodes);
-				generation_CRAN(BE_Q,nodes_antenas,nb_nodes,nb_antenas,current_slot,size_CRAN,nb_BBU,period,max_size,emission_time,emission_gap);
+				generation_CRAN(BE_Q,nodes_antenas,nb_nodes,nb_antenas,current_slot,size_CRAN,nb_BBU,period,max_size,emission_time,emission_gap,mode,ring,nodes_positions);
 			//	printf("before answers\n");aff_queues(BE_Q, CRAN_Q,nb_nodes);
 				generation_answers(ring,nodes_positions,BE_Q,nb_BBU,ring_size,current_slot, size_CRAN,max_size);
 			//	printf("before insert\n");aff_queues(BE_Q, CRAN_Q,nb_nodes);
