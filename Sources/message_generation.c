@@ -20,25 +20,28 @@ void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode,int ** nodes
 	int antena_id;
 	for(int i=0;i<antenas_distrib[node_id];i++)
 	{
-		if(mode == RESERVATION1)
-		{
-			if(i==0)
-				antena_id = node_id-1;
-			else
-				antena_id = (i+1)*nb_nodes + node_id-1;
+		switch(mode){
+			case RESERVATION1:
+			
+				if(i==0)
+					antena_id = node_id-1;
+				else
+					antena_id = (i)*nb_nodes + node_id-i-1;
 
-			if(antena_id < 5)
-				antenas[i] = ( ((antena_id+1)*2-1) - nodes_positions[node_id][0] -1 +period)%period; // (i*2-1) is the sequence of messages in the BBU [_1_2_3_4....]
-			else
-				antenas[i] = ( ((antena_id+1)*2-1) - nodes_positions[node_id][0] -1 +period + period/2)%period; // (i*2-1) is the sequence of messages in the BBU [_1_2_3_4....]
-			/*if(i==0)
-				antenas[i] = (2*size_ring+ (node_id*2-1) - nodes_positions[node_id][0] -1 +period)%period; // (i*2-1) is the sequence of messages in the BBU [_1_2_3_4....]
-			else
-				antenas[i] = (2*size_ring+ (node_id*2-1) - nodes_positions[node_id][0] -1 +period + period/2)%period; // (i*2-1) is the sequence of messages in the BBU [_1_2_3_4....]*/
-		}
-		else
-		{
-			antenas[i]= rand()%period;
+				printf("%d \n",antena_id);
+				if(antena_id < 5)
+					antenas[i] = ( ((antena_id)*2+1) - nodes_positions[node_id][0] -1 +period)%period; // (i*2-1) is the sequence of messages in the BBU [_1_2_3_4....]
+				else
+					antenas[i] = ( ((antena_id-5)*2+1) - nodes_positions[node_id][0] -1 +period + period/2)%period; // (i*2-1) is the sequence of messages in the BBU [_1_2_3_4....]
+				/*if(i==0)
+					antenas[i] = (2*size_ring+ (node_id*2-1) - nodes_positions[node_id][0] -1 +period)%period; // (i*2-1) is the sequence of messages in the BBU [_1_2_3_4....]
+				else
+					antenas[i] = (2*size_ring+ (node_id*2-1) - nodes_positions[node_id][0] -1 +period + period/2)%period; // (i*2-1) is the sequence of messages in the BBU [_1_2_3_4....]*/
+			break;
+			
+			default:
+				antenas[i]= rand()%period;
+			break;
 		}	
 	}
 
@@ -56,7 +59,11 @@ int ** init_nodes_antenas(int nb_nodes, int nb_antenas, int period, int nb_BBU,P
 		if(DEBUG)printf("Antenas generation at node %d:\n",i);
 		assert(nodes[i]=(int*)malloc(sizeof(int)*antenas_distrib[i]));
 		init_CRAN(nodes[i],period,nb_antenas,mode,nodes_positions,i,antenas_distrib,nb_nodes);
-
+		for(int j=0;j<antenas_distrib[i];j++)
+		{
+			printf("[%d]",nodes[i][j]);
+		}
+		printf("\n");
 	}
 
 	return nodes;
@@ -106,19 +113,15 @@ void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_ant
 			{
 				if(mode == RESERVATION1)
 				{
-					if( k < size_ring)
+					if( k <= size_ring)
 					{
 						if( (current_slot%period) == (( (nodes_antenas[i][j]+k) -size_ring + period) %period)  )
 						{
+							
+							ring[writing_Slot+1].reserved_for = 0;
+						
+							ring[writing_Slot].reserved_for = i;
 
-							if(ring[writing_Slot+1].reserved_for == -1)
-								ring[writing_Slot+1].reserved_for = 0;
-							else
-								ring[writing_Slot+1].pre_reserved = 0;
-							if(ring[writing_Slot].reserved_for == -1)
-								ring[writing_Slot].reserved_for = i;
-							else
-								ring[writing_Slot].pre_reserved = i;
 						}
 					}
 				}
@@ -128,25 +131,17 @@ void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_ant
 					{
 						if(k<(emission_time-size_ring) )
 						{
-
-							ring[writing_Slot+1].reserved_for = ring[writing_Slot+1].pre_reserved;
-							ring[writing_Slot+1].pre_reserved = -1;
-							ring[writing_Slot].reserved_for = ring[writing_Slot].pre_reserved;
-							ring[writing_Slot].pre_reserved = -1;
+								ring[writing_Slot+1].reserved_for = 0;
+								ring[writing_Slot].reserved_for = i;
 						}
-						/*if(k>=(emission_time-size_ring) )
+						if(k>=  (emission_time-size_ring) )
 						{
-							//printf("%d(%d) %d %d %d %d %d %d\n",i,nodes_positions[0][i],nodes_antenas[i][j],j,k,ring[writing_Slot].reserved_for ,ring[writing_Slot].pre_reserved,current_slot );
-							if(ring[writing_Slot].pre_reserved == 0)
+							if(ring[writing_Slot].reserved_for == i)
 							{
-	
 								ring[writing_Slot+1].reserved_for = -1;
-
 								ring[writing_Slot].reserved_for = -1;
 							}
-							//printf("%d(%d) %d %d %d %d %d %d\n-----------\n",i,nodes_positions[0][i],nodes_antenas[i][j],j,k,ring[writing_Slot].reserved_for ,ring[writing_Slot].pre_reserved,current_slot );
-							
-						}*/
+						}
 					}
 
 
@@ -157,6 +152,7 @@ void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_ant
 						CRAN_Q[i].queue[CRAN_Q[i].max_id] = current_slot; 	
 						CRAN_Q[i].kind[CRAN_Q[i].max_id] = 2; 	
 						CRAN_Q[i].max_id= (CRAN_Q[i].max_id+1)%max_size;
+
 					}
 				}
 			}
@@ -303,6 +299,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 					{
 						inserted++;
 						if(DEBUG)printf("CRAN packet at node %d",i);
+
 						ring[writing_Slot].owner = i;
 						cran_to_write = min(packet_size,CRAN_Q[i].size);
 						for(int j=0;j<cran_to_write/size_CRAN;j++)
@@ -373,6 +370,11 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 						}
 						CRAN_Q[i].size -= cran_to_write;
 						if(DEBUG)printf(".\n");
+						/*if(ring[writing_Slot].pre_reserved != -1)
+						{
+							ring[writing_Slot].reserved_for = ring[writing_Slot].pre_reserved;
+							ring[writing_Slot].pre_reserved = -1;
+						}*/
 					}
 					else // No CRAN
 					{

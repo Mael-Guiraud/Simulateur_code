@@ -142,7 +142,7 @@ float simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minima
 		
 		if(DEBUG)aff_queues(BE_Q, CRAN_Q,nb_nodes);
 		//printf("before be\n");aff_queues(BE_Q, CRAN_Q,nb_nodes);
-		if(current_slot > ring_size)
+		if(current_slot > 10*ring_size)
 		{
 			generation_BE(BE_Q,nb_nodes,size_BE,current_slot,max_size,vectors,chain,state);
 		}
