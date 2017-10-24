@@ -100,60 +100,20 @@ void generation_BE(Queue * BE_Q, int nb_nodes,int size_BE, int current_slot, int
 
 }
 
-void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_antenas, int current_slot, int size_CRAN,int nb_BBU, int period, int max_size, int emission_time, int emission_gap, Policy mode, Packet * ring, int ** nodes_positions, int * antenas_distrib)
+void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_antenas, int current_slot, int size_CRAN,int nb_BBU, int period, int max_size, int emission_time, int emission_gap,int * antenas_distrib)
 {
-	int writing_Slot ;
-	int size_ring = nodes_positions[0][1] + nodes_positions[1][0];
 	for(int i=nb_BBU;i<nb_nodes;i++)
 	{
-		writing_Slot= nodes_positions[0][i];
 		for(int j=0;j<antenas_distrib[i];j++)
 		{
 			for(int k=0;k<emission_time;k+=emission_gap)
 			{
-				if(mode == RESERVATION1)
-				{
-					if( k <= size_ring)
-					{
-						if( (current_slot%period) == (( (nodes_antenas[i][j]+k) -size_ring + period) %period)  )
-						{
-							
-							ring[writing_Slot+1].reserved_for = 0;
-						
-							ring[writing_Slot].reserved_for = i;
-
-						}
-					}
-				}
 				if( (nodes_antenas[i][j]+k)%period == current_slot%period)
 				{
-					if(mode == RESERVATION1 )
-					{
-						if(k<(emission_time-size_ring) )
-						{
-								ring[writing_Slot+1].reserved_for = 0;
-								ring[writing_Slot].reserved_for = i;
-						}
-						if(k>=  (emission_time-size_ring) )
-						{
-							if(ring[writing_Slot].reserved_for == i)
-							{
-								ring[writing_Slot+1].reserved_for = -1;
-								ring[writing_Slot].reserved_for = -1;
-							}
-						}
-					}
-
-
-
-					if(current_slot > size_ring)
-					{
-						CRAN_Q[i].size += size_CRAN;
-						CRAN_Q[i].queue[CRAN_Q[i].max_id] = current_slot; 	
-						CRAN_Q[i].kind[CRAN_Q[i].max_id] = 2; 	
-						CRAN_Q[i].max_id= (CRAN_Q[i].max_id+1)%max_size;
-
-					}
+					CRAN_Q[i].size += size_CRAN;
+					CRAN_Q[i].queue[CRAN_Q[i].max_id] = current_slot; 	
+					CRAN_Q[i].kind[CRAN_Q[i].max_id] = 2; 	
+					CRAN_Q[i].max_id= (CRAN_Q[i].max_id+1)%max_size;
 				}
 			}
 		}

@@ -13,10 +13,10 @@ int main()
 {
 	srand(time(NULL));
 	int ring_size = 100;
-	int nb_nodes=7;
+	int nb_nodes=6;
 	int nb_BBU=1;
 
-	int nb_antenas=7;
+	int nb_antenas=5;
 	int period=1000;
 
 	int emission_time = 500;
@@ -29,9 +29,9 @@ int main()
 	int size_BE =15 ;
 	int packet_size = 10000;
 
-	//Policy mode = NO_MANAGMENT;
+	Policy mode = NO_MANAGMENT;
 	//Policy mode = CRAN_FIRST;
-	Policy mode = RESERVATION1;
+	//Policy mode = RESERVATION1;
 	int simulation_lenght = 5000;
 
 	int nb_simuls= 100;
