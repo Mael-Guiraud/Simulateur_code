@@ -28,7 +28,7 @@ void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode,int ** nodes
 				else
 					antena_id = (i)*nb_nodes + node_id-i-1;
 
-				printf("%d \n",antena_id);
+				printf("%dfg \n",antena_id);
 				if(antena_id < 5)
 					antenas[i] = ( ((antena_id)*2+1) - nodes_positions[node_id][0] -1 +period)%period; // (i*2-1) is the sequence of messages in the BBU [_1_2_3_4....]
 				else
@@ -156,7 +156,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 	{
 		writing_Slot = nodes_positions[0][i];
 		packet_created_size = 0;
-		//printf(" We are at node %d, the slot is reserved for %d, used by %d and i have %d CRAN in queu\n",i,ring[writing_Slot].reserved_for,ring[writing_Slot].owner,CRAN_Q[i].size);
+		printf(" We are at node %d, the slot is reserved for %d, used by %d and i have %d CRAN in queu\n",i,ring[writing_Slot].reserved_for,ring[writing_Slot].owner,CRAN_Q[i].size);
 		if( (ring[writing_Slot].owner == -1) && ((ring[writing_Slot].reserved_for == -1)  || (ring[writing_Slot].reserved_for == i)   )   )//IF the slot is free and not reserved for another
 		{
 			switch(mode)

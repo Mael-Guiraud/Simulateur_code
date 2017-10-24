@@ -13,10 +13,10 @@ int main()
 {
 	srand(time(NULL));
 	int ring_size = 100;
-	int nb_nodes=6;
+	int nb_nodes=5;
 	int nb_BBU=1;
 
-	int nb_antenas=5;
+	int nb_antenas=4;
 	int period=1000;
 
 	int emission_time = 500;
