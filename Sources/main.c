@@ -16,7 +16,7 @@ int main()
 	int nb_nodes=5;
 	int nb_BBU=1;
 
-	int nb_antenas=4;
+	int nb_antenas=5;
 	int period=1000;
 
 	int emission_time = 500;
@@ -29,9 +29,10 @@ int main()
 	int size_BE =15 ;
 	int packet_size = 10000;
 
-	Policy mode = NO_MANAGMENT;
+	//Policy mode = NO_MANAGMENT;
 	//Policy mode = CRAN_FIRST;
-	//Policy mode = RESERVATION1;
+	Policy mode = RESERVATION;
+	int res_kind = 3;
 	int simulation_lenght = 5000;
 
 	int nb_simuls= 100;
@@ -70,7 +71,7 @@ int main()
 	for(int i=0;i<nb_simuls;i++	)
 	{
 		fprintf(stdout,"\r Step %d/%d",i+1,nb_simuls);fflush(stdout);
-		load = simulate(ring_size,nb_nodes,nb_antenas,period,minimal_buffer_size,nb_BBU,size_CRAN,size_BE,packet_size,emission_time,emission_gap, mode,simulation_lenght,time_before_measure, max_size,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU,table_size,vectors,chain,&state);
+		load = simulate(ring_size,nb_nodes,nb_antenas,period,minimal_buffer_size,nb_BBU,size_CRAN,size_BE,packet_size,emission_time,emission_gap, mode,simulation_lenght,time_before_measure, max_size,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU,table_size,vectors,chain,&state, res_kind);
 		Average_load += load;
 		max_load = f_max(max_load,load);
 		min_load = f_min(min_load,load);
