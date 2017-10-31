@@ -14,7 +14,7 @@ typedef struct queue{
 }Queue ;
 //Different kinds of messages sent by the servers
 typedef enum policy{
-    NO_MANAGMENT, CRAN_FIRST, RESERVATION
+    NO_MANAGMENT, CRAN_FIRST, RESERVATION, SPLIT_FREQ
 } Policy;
 
 #define DEBUG 0

@@ -9,7 +9,7 @@ else
 endif
 
 
-CFLAGS = -c -lm -g -std=c99 -Wall -O3 
+CFLAGS = -c -lm -g -std=c99 -Wall -O2
 
 DIRbin = bin/
 DIRdata = ../datas/

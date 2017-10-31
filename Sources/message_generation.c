@@ -23,16 +23,19 @@ int * repart(int n, int k)
 	int i=0;
 	int j=0;
 
-	for(i;j<r; i+= (q+1))
+	while(j<r)
 	{
 		rep[j] = i;
 		j++;
+		i+= (q+1);
 	}
-	for(i;j<k;i+=q)
+	while(j<k)
 	{
 		rep[j] = i;
 		j++;
+		i+=q;
 	}
+
 
 	return rep;
 
@@ -61,20 +64,26 @@ int inter_id(int * inters, int nb_inters,int antena_id)
 		printf("%d %d %d \n",cmpt, antena_id,i);
 		if(cmpt>antena_id)
 		{
-			printf("ON RENTRE ?\n");
 			return i;
 		}
 	}
+	return -1;
 }
 int nb_previous(int * inters, int nb_inters,int antena_id)
 {
 	int cmpt = 0;
 	for(int i=0;i<nb_inters;i++)
 	{
-		cmpt+= inters[i];
-		if(cmpt>=antena_id)
+		printf("Tour %d %d %d \n",i,cmpt,inters[i]);
+		cmpt = cmpt+inters[i];
+		printf("apres %d %d \n",cmpt,inters[i]);
+		if(cmpt>antena_id)
+		{
+			printf("%d retour\n",cmpt-inters[i]);
 			return cmpt-inters[i];
+		}
 	}
+	return -1;
 }
 
 //Init the sending slot of the antenas for a node
@@ -86,15 +95,15 @@ void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode,int ** nodes
 	int nb_macro_inters;
 	int inter_idt;
 	int nb_antenas_previous;
+	int freq;
 	for(int i=0;i<antenas_distrib[node_id];i++)
 	{
+		if(i==0)
+			antena_id = node_id-1;
+		else
+			antena_id = (i)*nb_nodes + node_id-i-1;
 		switch(mode){
 			case RESERVATION:
-			
-				if(i==0)
-					antena_id = node_id-1;
-				else
-					antena_id = (i)*nb_nodes + node_id-i-1;
 				switch(res_kind)
 				{
 					case 1:
@@ -106,16 +115,22 @@ void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode,int ** nodes
 				 		free(repartition);
 				 	break;
 				 	case 3:
+				 		inter_idt = antena_id /(emission_gap/2);
+				 		printf("%d %d\n",antena_id,inter_idt);
+				 		antenas[i] = ( ((antena_id%(emission_gap/2))*2+1) - (nodes_positions[node_id][0] -1) + (inter_idt*(emission_time+ring_size) ) +period)%period; 
+				 	break;
+
+				 	case 4:
 				 		nb_macro_inters = period/(emission_time+ring_size);
-				 		printf("NB nb_macro_inters = %d \n",nb_macro_inters);
+				 		//printf("\n\n %d --------\nNB nb_macro_inters = %d \n",antena_id,nb_macro_inters);
 				 		repartition_inter = repart_inter(nb_macro_inters,nb_antenas);
-				 		for(int z=0;z<nb_macro_inters;z++)printf("%d,",repartition_inter[z]);printf("\n");
+				 		//for(int z=0;z<nb_macro_inters;z++)printf("%d,",repartition_inter[z]);printf("\n");
 				 		inter_idt = inter_id(repartition_inter,nb_macro_inters,antena_id);
-				 		printf("inter_idt = %d\n",inter_idt);
-				 		nb_antenas_previous = nb_previous(repartition_inter,nb_macro_inters,nb_antenas);
-				 		printf("nb_antenas_previous = %d \n",nb_antenas_previous);
+				 		//printf("inter_idt = %d\n",inter_idt);
+				 		nb_antenas_previous = nb_previous(repartition_inter,nb_macro_inters,antena_id);
+				 		//printf("nb_antenas_previous = %d \n",nb_antenas_previous);
 				 		repartition = repart(emission_gap/2,repartition_inter[inter_idt]);
-				 		for(int z=0;z<repartition_inter[inter_idt];z++)printf("%d,",repartition[z]);printf("\n");
+				 		//for(int z=0;z<repartition_inter[inter_idt];z++)printf("%d,",repartition[z]);printf("\n");
 		
 				 		antenas[i] = ( ((repartition[antena_id-nb_antenas_previous])*2+1) - (nodes_positions[node_id][0] -1) + (inter_idt*(emission_time+ring_size) ) +period)%period; 
 
@@ -124,11 +139,26 @@ void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode,int ** nodes
 	
 				 		free(repartition_inter);
 				 		
-				 	break;
+				 	break;				 
 				}
 
 			break;
-			
+			case SPLIT_FREQ:
+				if(antena_id %2 ==0)
+				{
+					freq = antena_id+1;
+				}
+				else
+				{
+					freq = antena_id;
+				}
+				antenas[i] =  (freq - (nodes_positions[node_id][0] -1) + ( (freq/2)*ring_size ) +period)%period; 
+				if(antena_id %2)
+				{
+					antenas[i] =  (antenas[i] + emission_time)%period;
+				}
+				printf("%d %d \n",antena_id,antenas[i]);
+			break;
 			default:
 				antenas[i]= rand()%period;
 			break;
@@ -155,8 +185,9 @@ int ** init_nodes_antenas(int nb_nodes, int nb_antenas, int period, int nb_BBU,P
 			printf("[%d]",nodes[i][j]);
 		}
 		printf("\n");
+	
 	}
-
+	
 	return nodes;
 }
 
@@ -191,22 +222,55 @@ void generation_BE(Queue * BE_Q, int nb_nodes,int size_BE, int current_slot, int
 
 }
 
-void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_antenas, int current_slot, int size_CRAN,int nb_BBU, int period, int max_size, int emission_time, int emission_gap,int * antenas_distrib)
+void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_antenas, int current_slot, int size_CRAN,int nb_BBU, int period, int max_size, int emission_time, int emission_gap,int * antenas_distrib,Policy mode,int ** nodes_positions,int ring_size)
 {
 	for(int i=nb_BBU;i<nb_nodes;i++)
 	{
 		for(int j=0;j<antenas_distrib[i];j++)
 		{
-			for(int k=0;k<emission_time;k+=emission_gap)
+			switch(mode)
 			{
-				if( (nodes_antenas[i][j]+k)%period == current_slot%period)
-				{
-					//printf("Creating CRAN message on queue %d at date %d .\n",i,current_slot);
-					CRAN_Q[i].size += size_CRAN;
-					CRAN_Q[i].queue[CRAN_Q[i].max_id] = current_slot; 	
-					CRAN_Q[i].kind[CRAN_Q[i].max_id] = 2; 	
-					CRAN_Q[i].max_id= (CRAN_Q[i].max_id+1)%max_size;
-				}
+				case SPLIT_FREQ:
+					;	
+					int freq = (nodes_antenas[i][j] + nodes_positions[i][0] -1) %emission_gap;
+					int shift = 9-freq;
+					int k;
+					for(k=0;k<emission_time-ring_size;k+=emission_gap)
+					{
+						if( (nodes_antenas[i][j]+k)%period == current_slot%period)
+						{
+							//printf("Creating CRAN message on queue %d at date %d .\n",i,current_slot);
+							CRAN_Q[i].size += size_CRAN;
+							CRAN_Q[i].queue[CRAN_Q[i].max_id] = current_slot; 	
+							CRAN_Q[i].kind[CRAN_Q[i].max_id] = 2; 	
+							CRAN_Q[i].max_id= (CRAN_Q[i].max_id+1)%max_size;
+						}
+					}
+					for(;k<emission_time;k+= emission_gap)
+					{
+						if( (nodes_antenas[i][j]+k+shift)%period == current_slot%period)
+						{
+							//printf("Creating CRAN message on queue %d at date %d .\n",i,current_slot);
+							CRAN_Q[i].size += size_CRAN;
+							CRAN_Q[i].queue[CRAN_Q[i].max_id] = current_slot; 	
+							CRAN_Q[i].kind[CRAN_Q[i].max_id] = 2; 	
+							CRAN_Q[i].max_id= (CRAN_Q[i].max_id+1)%max_size;
+						}
+					}
+				break;
+				default:
+					for(int k=0;k<emission_time;k+=emission_gap)
+					{
+						if( (nodes_antenas[i][j]+k)%period == current_slot%period)
+						{
+							//printf("Creating CRAN message on queue %d at date %d .\n",i,current_slot);
+							CRAN_Q[i].size += size_CRAN;
+							CRAN_Q[i].queue[CRAN_Q[i].max_id] = current_slot; 	
+							CRAN_Q[i].kind[CRAN_Q[i].max_id] = 2; 	
+							CRAN_Q[i].max_id= (CRAN_Q[i].max_id+1)%max_size;
+						}
+					}
+				break;
 			}
 		}
 	}
@@ -236,34 +300,81 @@ void generation_answers(Packet* ring, int** nodes_positions, Queue* CRAN_Q, int 
 	}
 }
 
-void reservation_management(Packet* ring, int ring_size, int** nodes_antenas, int** nodes_positions, int nb_nodes, int current_slot,int nb_BBU, int period, int emission_time, int emission_gap,int * antenas_distrib)
+void reservation_management(Packet* ring, int ring_size, int** nodes_antenas, int** nodes_positions, int nb_nodes, int current_slot,int nb_BBU, int period, int emission_time, int emission_gap,int * antenas_distrib,Policy mode)
 {
 	int writing_Slot ;
+	int k;
 	for(int i=nb_BBU;i<nb_nodes;i++)
 	{
 		writing_Slot  = nodes_positions[0][i];
 		for(int j=0;j<antenas_distrib[i];j++)
 		{
-			for(int k=0;k<ring_size;k+=emission_gap)
+			for(k=0;k<ring_size;k+=emission_gap)
 			{
 				if( (nodes_antenas[i][j] + k - ring_size + period)%period == current_slot%period )
 				{
+					//printf("We reserve (%d %d) on a slot reserved for (%d %d)\n",0,i,ring[writing_Slot+1].reserved_for,ring[writing_Slot].reserved_for);
 					ring[writing_Slot+1].reserved_for = 0;
 					ring[writing_Slot].reserved_for = i;
 				} 
 			}
-			for(int k;k<emission_time-ring_size;k+=emission_gap)
+			switch(mode)
 			{
-				if( (nodes_antenas[i][j]+k)%period == current_slot%period)
-				{
-					ring[writing_Slot+1].reserved_for = 0;
-					ring[writing_Slot].reserved_for = i;
-				}
-			}
-			for(int k;k<emission_time;k+=emission_gap)
-			{
-				ring[writing_Slot+1].reserved_for = -1;
-				ring[writing_Slot].reserved_for = -1;
+				case SPLIT_FREQ: ;
+
+					int freq = (nodes_antenas[i][j] + nodes_positions[i][0] -1) %emission_gap;
+					int shift = 9-freq;
+					for(;k<emission_time-2*ring_size;k+=emission_gap)
+					{
+						if( (nodes_antenas[i][j]+k)%period == current_slot%period)
+						{
+							ring[writing_Slot+1].reserved_for = 0;
+							ring[writing_Slot].reserved_for = i;
+						}
+					}
+					for(;k<emission_time-ring_size;k+=emission_gap)
+					{
+						//printf("We(%d) free a slot reserved for (%d %d)\n",i,ring[writing_Slot+1].reserved_for,ring[writing_Slot].reserved_for);
+						if( (nodes_antenas[i][j]+k)%period == current_slot%period)
+						{
+							ring[writing_Slot+1].reserved_for = -1;
+							ring[writing_Slot].reserved_for = -1;
+						}
+						if( (nodes_antenas[i][j]+k+shift)%period == current_slot%period)
+						{
+							ring[writing_Slot+1].reserved_for = -1;
+							ring[writing_Slot].reserved_for = -1;
+						}
+					}
+					for(;k<emission_time;k+=emission_gap)
+					{
+						//printf("We(%d) free a slot reserved for (%d %d)\n",i,ring[writing_Slot+1].reserved_for,ring[writing_Slot].reserved_for);
+						if( (nodes_antenas[i][j]+k+shift)%period == current_slot%period)
+						{
+							ring[writing_Slot+1].reserved_for = -1;
+							ring[writing_Slot].reserved_for = -1;
+						}
+					}
+				break;
+				default:
+					for(;k<emission_time-ring_size;k+=emission_gap)
+					{
+						if( (nodes_antenas[i][j]+k)%period == current_slot%period)
+						{
+							ring[writing_Slot+1].reserved_for = 0;
+							ring[writing_Slot].reserved_for = i;
+						}
+					}
+					for(;k<emission_time;k+=emission_gap)
+					{
+						//printf("We(%d) free a slot reserved for (%d %d)\n",i,ring[writing_Slot+1].reserved_for,ring[writing_Slot].reserved_for);
+						if( (nodes_antenas[i][j]+k)%period == current_slot%period)
+						{
+							ring[writing_Slot+1].reserved_for = -1;
+							ring[writing_Slot].reserved_for = -1;
+						}
+					}
+				break;
 			}
 		}
 	}
