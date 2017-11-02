@@ -239,7 +239,7 @@ void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_ant
 					{
 						if( (nodes_antenas[i][j]+k)%period == current_slot%period)
 						{
-							//printf("Creating CRAN message on queue %d at date %d .\n",i,current_slot);
+							//if(i==1)printf("1 Creating CRAN message on queue %d at date %d .\n",i,current_slot);
 							CRAN_Q[i].size += size_CRAN;
 							CRAN_Q[i].queue[CRAN_Q[i].max_id] = current_slot; 	
 							CRAN_Q[i].kind[CRAN_Q[i].max_id] = 2; 	
@@ -250,7 +250,7 @@ void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_ant
 					{
 						if( (nodes_antenas[i][j]+k+shift)%period == current_slot%period)
 						{
-							//printf("Creating CRAN message on queue %d at date %d .\n",i,current_slot);
+							//if(i==1)printf("2 Creating CRAN message on queue %d at date %d .\n",i,current_slot);
 							CRAN_Q[i].size += size_CRAN;
 							CRAN_Q[i].queue[CRAN_Q[i].max_id] = current_slot; 	
 							CRAN_Q[i].kind[CRAN_Q[i].max_id] = 2; 	
@@ -610,6 +610,11 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 					}
 				break;
 			}
+		}
+		else
+		{
+			if( CRAN_Q[i].size >0)
+				printf("%d essaye d'inserer mais il ne peut pas a la date %d (%d %d) \n",i,current_slot,ring[writing_Slot].owner,ring[writing_Slot].reserved_for);
 		}
 	}
 	return inserted;
