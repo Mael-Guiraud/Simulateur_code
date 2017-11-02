@@ -16,7 +16,7 @@ int main()
 	int nb_nodes=5;
 	int nb_BBU=1;
 
-	int nb_antenas=4;
+	int nb_antenas=2;
 	int period=1000;
 
 	int emission_time = 500;
@@ -26,7 +26,7 @@ int main()
 
 	int minimal_buffer_size = 7000;
 	int size_CRAN = 10000;
-	int size_BE =0 ;
+	int size_BE =15 ;
 	int packet_size = 10000;
 
 	//Policy mode = NO_MANAGMENT;
