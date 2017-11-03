@@ -16,7 +16,7 @@ int main()
 	int nb_nodes=5;
 	int nb_BBU=1;
 
-	int nb_antenas=2;
+	int nb_antenas=1;
 	int period=1000;
 
 	int emission_time = 500;
