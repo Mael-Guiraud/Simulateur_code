@@ -1,7 +1,7 @@
 
 OS := $(shell uname)
 ifeq ($(OS),Darwin)
-  CC = gcc-7
+  CC = gcc
   PROFILING = qcachegrind
 else
   CC = gcc

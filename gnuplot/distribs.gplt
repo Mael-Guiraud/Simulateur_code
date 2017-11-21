@@ -3,5 +3,5 @@ replot '../datas/be_bbu_distrib.data' title "BBU BE"
 replot '../datas/cran_distrib.data' title "Uplink" 
 replot '../datas/answers_distrib.data' title "Downlink" 
 set term postscript color solid
-set output '| ps2pdf - ../gnuplot/1_a_no_BE.pdf'
+set output '| ps2pdf - ../gnuplot/Split_high.pdf'
 replot

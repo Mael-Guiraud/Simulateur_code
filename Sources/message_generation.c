@@ -13,33 +13,22 @@ int min(int a, int b)
 }
 
 
-int * repart(int n, int k)
-{
-	int * rep = (int*)malloc(sizeof(int)*k);
-
+int* repart(int k, int n){
+	int* res = calloc(k,sizeof(int));
+	if(k<=1) return res;
 	int q = n/k;
 	int r = n%k;
-
-	int i=0;
-	int j=0;
-
-	while(j<r)
-	{
-		rep[j] = i;
-		j++;
-		i+= (q+1);
+	int* space = repart(r,k);
+	for(int i= 0; i< r; i++){
+		res[space[i]] = 1;
 	}
-	while(j<k)
-	{
-		rep[j] = i;
-		j++;
-		i+=q;
+	for(int i = 1; i < k; i++ ){
+		res[i] += res[i-1] + q;
 	}
-
-
-	return rep;
-
+	free(space);
+	return res;
 }
+
 int * repart_inter(int nb_inters,int nb_antenas)
 {
 	int * rep = (int*)malloc(sizeof(int)*nb_inters);
@@ -113,8 +102,12 @@ void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode,int ** nodes
 				 		antenas[i] = ( ((antena_id)*2+1) - (nodes_positions[node_id][0] -1) +period)%period; // (i*2-1) is the sequence of messages in the BBU [_1_2_3_4....]
 				 		break;
 				 	case 2:
-				 		repartition = repart(emission_gap/2,nb_antenas);
+				 		repartition = repart(nb_antenas,emission_gap/2);
 				 		antenas[i] = ( ((repartition[antena_id])*2+1) - (nodes_positions[node_id][0] -1) +period)%period; // (i*2-1) is the sequence of messages in the BBU [_1_2_3_4....]
+				 		free(repartition);
+				 		repartition = repart(nb_antenas,period);
+				 		antenas[i] += repartition [antena_id] - (repartition [antena_id] % emission_gap);
+				 		//printf("%d [%d %d] \n",period,antena_id,repartition[antena_id]);
 				 		free(repartition);
 				 	break;
 				 	case 3:
@@ -132,11 +125,11 @@ void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode,int ** nodes
 				 		//printf("inter_idt = %d\n",inter_idt);
 				 		nb_antenas_previous = nb_previous(repartition_inter,nb_macro_inters,antena_id);
 				 		//printf("nb_antenas_previous = %d \n",nb_antenas_previous);
-				 		repartition = repart(emission_gap/2,repartition_inter[inter_idt]);
+				 		repartition = repart(repartition_inter[inter_idt],emission_gap/2);
 				 		//for(int z=0;z<repartition_inter[inter_idt];z++)printf("%d,",repartition[z]);printf("\n");
 		
 				 		antenas[i] = ( ((repartition[antena_id-nb_antenas_previous])*2+1) - (nodes_positions[node_id][0] -1) + (inter_idt*(emission_time+ring_size) ) +period)%period; 
-
+				 		//printf("%d \n",antenas[i]);
 				 		free(repartition);
 
 	
@@ -195,7 +188,10 @@ int ** init_nodes_antenas(int nb_nodes, int nb_antenas, int period, int nb_BBU,P
 		assert(nodes[i]=(int*)malloc(sizeof(int)*antenas_distrib[i]));
 
 		init_CRAN(nodes[i],period,nb_antenas,mode,nodes_positions,i,antenas_distrib,nb_nodes,res_kind,emission_gap, emission_time,ring_size,shift);
+
 	}
+
+
 
 	
 	return nodes;
@@ -216,7 +212,7 @@ void generation_BE(Queue * BE_Q, int nb_nodes,int size_BE, int current_slot, int
 	for(int i=0;i<nb_nodes;i++)
 	{
 		if(DEBUG)printf("BE messages generation at node %d.\n",i);
-		number_generated = sbbp_generation(vectors, *state);
+		number_generated = sbbp_generation(vectors, *state)*3;
 		BE_Q[i].size += (number_generated*size_BE); 
 		if(size_BE)
 		{
@@ -644,6 +640,8 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 		}
 		else
 		{
+			if( (ring[writing_Slot].owner == -1) && (BE_Q[i].size)>0 )//IF the slot is free
+				inserted++;
 			if( CRAN_Q[i].size >0)
 			{
 				if(DEBUG)printf("%d essaye d'inserer mais il ne peut pas a la date %d (%d %d) (%d) \n",i,current_slot,ring[writing_Slot].owner,ring[writing_Slot].reserved_for,ring[writing_Slot].nb_CRAN);
