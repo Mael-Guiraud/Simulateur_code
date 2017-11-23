@@ -1,7 +1,14 @@
-plot '../datas/be_distrib.data' title "BE" 
-replot '../datas/be_bbu_distrib.data' title "BBU BE" 
-replot '../datas/cran_distrib.data' title "Uplink" 
-replot '../datas/answers_distrib.data' title "Downlink" 
+plot '../datas/be_distrib.data' title "BE" smooth frequency
+replot '../datas/be_bbu_distrib.data' title "BBU BE" smooth frequency
+replot '../datas/cran_distrib.data' title "Uplink" smooth frequency
+replot '../datas/answers_distrib.data' title "Downlink" smooth frequency
 set term postscript color solid
-set output '| ps2pdf - ../gnuplot/Split_high.pdf'
+set xrange [0:200]
+set yrange [0:40]
+set title "Distribution of the latency for differents traffics"
+set xlabel "{/Symbol m}s" 
+set xtics 10
+set ytics 10
+set ylabel "Distribution (%)"
+set output '| ps2pdf - ../gnuplot/Insertion_management.pdf'
 replot

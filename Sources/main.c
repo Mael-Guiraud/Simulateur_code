@@ -16,7 +16,7 @@ int main()
 	int nb_nodes=5;
 	int nb_BBU=1;
 
-	int nb_antenas=3;
+	int nb_antenas=5;
 	int period=1000;
 
 	int emission_time = 500;
@@ -29,11 +29,11 @@ int main()
 	int size_BE =15;
 	int packet_size = 10000;
 
-	Policy mode = NO_MANAGMENT;
-	//Policy mode = CRAN_FIRST;
+	//Policy mode = NO_MANAGMENT;
+	Policy mode = CRAN_FIRST;
 	//Policy mode = RESERVATION;
 	//Policy mode = SPLIT_FREQ;
-	int res_kind = 4;
+	int res_kind = 2;
 	int simulation_lenght = 5000;
 
 	int nb_simuls= 100;
@@ -52,7 +52,7 @@ int main()
 	int table_size = 50000; //Upgrade this value if the programs answers that the table to save the datas is too short
 
 	char name[64];
-	sprintf(name,"../gnuplot/Split_high.pdf"); // name of the output pdf
+	sprintf(name,"../gnuplot/Insertion_management.pdf"); // name of the output pdf
 
 	float Average_load = 0.0;
 	float max_load = 0.0;

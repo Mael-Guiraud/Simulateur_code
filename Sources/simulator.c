@@ -147,8 +147,8 @@ float simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minima
 	for(int current_slot=0;current_slot<simulation_lenght;current_slot++)
 	{
 		
-		if(DEBUG)aff_queues(BE_Q, CRAN_Q,nb_nodes);
-		//printf("before be\n");aff_queues(BE_Q, CRAN_Q,nb_nodes);
+		//aff_queues(BE_Q, CRAN_Q,nb_nodes);
+		//printf("\n");
 		if(current_slot > 10*ring_size)
 		{
 			generation_BE(BE_Q,nb_nodes,size_BE,current_slot,max_size,vectors,chain,state);
@@ -156,14 +156,14 @@ float simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minima
 		switch(mode)
 		{
 			case NO_MANAGMENT:
-				generation_CRAN(BE_Q,nodes_antenas,nb_nodes,nb_antenas,current_slot,size_CRAN,nb_BBU,period,max_size,emission_time,emission_gap,antenas_distrib,mode,nodes_positions,ring_size,shift);
-				generation_answers(ring,nodes_positions,BE_Q,nb_BBU,ring_size,current_slot, size_CRAN,max_size);
+				generation_CRAN(BE_Q,nodes_antenas,nb_nodes,nb_antenas,current_slot,size_CRAN,size_BE,nb_BBU,period,max_size,emission_time,emission_gap,antenas_distrib,mode,nodes_positions,ring_size,shift);
+				generation_answers(ring,nodes_positions,BE_Q,nb_BBU,ring_size,current_slot, size_CRAN,size_BE,mode,max_size);
 				load += (float)insert_packets(BE_Q,BE_Q,ring,nodes_positions,packet_size,minimal_buffer_size,mode,nb_nodes,size_CRAN,size_BE,max_size,current_slot,nb_BBU,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU, time_before_measure,tab_size);
 				
 			break;
 			default:
-				generation_CRAN(CRAN_Q,nodes_antenas,nb_nodes,nb_antenas,current_slot,size_CRAN,nb_BBU,period,max_size,emission_time,emission_gap,antenas_distrib,mode,nodes_positions,ring_size,shift);
-				generation_answers(ring,nodes_positions,CRAN_Q,nb_BBU,ring_size,current_slot, size_CRAN,max_size);
+				generation_CRAN(CRAN_Q,nodes_antenas,nb_nodes,nb_antenas,current_slot,size_CRAN,size_BE,nb_BBU,period,max_size,emission_time,emission_gap,antenas_distrib,mode,nodes_positions,ring_size,shift);
+				generation_answers(ring,nodes_positions,CRAN_Q,nb_BBU,ring_size,current_slot, size_CRAN,size_BE,mode,max_size);
 				if(mode != CRAN_FIRST)
 					reservation_management(ring, ring_size, nodes_antenas, nodes_positions,nb_nodes, current_slot,nb_BBU, period, emission_time, emission_gap, antenas_distrib,mode,shift);
 				load += (float)insert_packets(BE_Q,CRAN_Q,ring,nodes_positions,packet_size,minimal_buffer_size,mode,nb_nodes,size_CRAN,size_BE,max_size,current_slot,nb_BBU,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU ,time_before_measure,tab_size);
@@ -172,12 +172,6 @@ float simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minima
 		
 		remove_packets(nodes_positions,ring,nb_nodes,ring_size);
 		rotate_ring(ring,ring_size);
-		// for(int i=0;i<ring_size;i++)
-		// {
-		// 	if(ring[i].owner != -1)
-		// 	printf("[%d-%d]",i,ring[i].owner);
-		// }
-		// printf("\n");
 	}
 	if(DEBUG)printf("\n Real Load = %f\n",load/simulation_lenght);
 
