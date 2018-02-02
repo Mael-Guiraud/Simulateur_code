@@ -1,7 +1,7 @@
 
 OS := $(shell uname)
 ifeq ($(OS),Darwin)
-  CC = gcc
+  CC = gcc-7
   PROFILING = qcachegrind
 else
   CC = gcc
@@ -21,6 +21,7 @@ run : prog
 
 gnuplot:
 	gnuplot ../gnuplot/distribs.gplt
+	gnuplot ../gnuplot/train.gplt
 
 debug : prog 
 	valgrind ./prog

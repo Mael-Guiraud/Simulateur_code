@@ -172,12 +172,12 @@ void stationary_distribution(float ** chain, int nb_states)
 		iteration++;
 
 	}while(!equals(pi_0,pi_n,nb_states));
-	/*
+	
 	printf("Stationary Distribution found at n = %d \n",iteration);
 	for(int i=0;i<nb_states;i++)
 	{
 		printf("%f ",pi_n[i]);
 	}printf("\n");
-	*/
+	
 
 }

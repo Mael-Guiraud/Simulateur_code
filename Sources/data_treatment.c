@@ -17,6 +17,8 @@ int id_max_divide(float * tab, int size)
 			tab[i]/= cardinal;
 		else
 			tab[i]=0;
+
+		tab[i] *= 100;
 	}
 	return id;
 }
@@ -58,13 +60,13 @@ void write_files(float* tab_BE,float * tab_CRAN, float* tab_ANSWERS,float* tab_B
 	for(int i=1;i<id;i++)
 	{
 		if(tab_BE[i])
-			fprintf(f_BE,"%d %f\n",i,tab_BE[i]*100);
+			fprintf(f_BE,"%d %f\n",i,tab_BE[i]);
 		if(tab_CRAN[i])	
-			fprintf(f_CRAN,"%d %f\n",i,tab_CRAN[i]*100);
+			fprintf(f_CRAN,"%d %f\n",i,tab_CRAN[i]);
 		if(tab_ANSWERS[i])
-			fprintf(f_ANSWERS,"%d %f\n",i,tab_ANSWERS[i]*100);
+			fprintf(f_ANSWERS,"%d %f\n",i,tab_ANSWERS[i]);
 		if(tab_BE_BBU[i])
-			fprintf(f_BE_BBU,"%d %f\n",i,tab_BE_BBU[i]*100);
+			fprintf(f_BE_BBU,"%d %f\n",i,tab_BE_BBU[i]);
 	}
 	fclose(f_CRAN);
 	fclose(f_ANSWERS);
@@ -78,17 +80,19 @@ void print_gnuplot(char * name)
 	FILE* f_GPLT = fopen("../gnuplot/distribs.gplt","w");
 	if(!f_GPLT){perror("Opening gplt file failure\n");exit(2);}
 
-	fprintf(f_GPLT,"plot '../datas/be_distrib.data' title \"BE\" smooth frequency\n"
-	"replot '../datas/be_bbu_distrib.data' title \"BBU BE\" smooth frequency\n"
-	"replot '../datas/cran_distrib.data' title \"Uplink\" smooth frequency\n"
-	"replot '../datas/answers_distrib.data' title \"Downlink\" smooth frequency\n"
+	fprintf(f_GPLT,"plot '../datas/be_distrib.data' smooth cumulative title \"BE\" \n"
+	"replot '../datas/be_bbu_distrib.data' title \"BBU BE\" smooth cumulative\n"
+	"replot '../datas/cran_distrib.data' title \"Uplink\" smooth cumulative\n"
+	"replot '../datas/answers_distrib.data' title \"Downlink\" smooth cumulative\n"
 	"set term postscript color solid\n"
-	"set xrange [0:200]\n"
-	"set yrange [0:40]\n"
-	"set title \"Distribution of the latency for differents traffics\"\n"
-	"set xlabel \"{/Symbol m}s\" \n"
-	"set xtics 10\n" 
+
+	"set xrange [0:500] \n"
+	"set yrange [0:100] \n"
+	"set title \"Cumulative distribution of the latency for differents traffics\"\n"
+	"set xlabel \"Latency ({/Symbol m}s)\" \n"
+	//"set xtics 10\n" 
 	"set ytics 10\n" 
+	"set key bottom right \n"
 	"set ylabel \"Distribution (%%)\"\n"
 	"set output '| ps2pdf - %s'\nreplot\n",name);
 	fclose(f_GPLT);

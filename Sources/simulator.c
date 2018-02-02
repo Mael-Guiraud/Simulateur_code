@@ -124,12 +124,99 @@ int* init_nb_antenas(int nb_nodes,int nb_antenas)
 	return antenas_distrib;
 
 }
-float simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minimal_buffer_size,int nb_BBU,int size_CRAN,int size_BE,int packet_size, int emission_time, int emission_gap,Policy mode, int simulation_lenght,int time_before_measure, int max_size,float * tab_BE,float* tab_CRAN,float* tab_ANSWERS,float * tab_BE_BBU, int tab_size , float *** vectors,float ** chain, int* state, int res_kind)
+
+int max_chain_length(Packet* ring, int ring_size)
+{
+	int cmpt=0;
+	int max = 0;
+	int i;
+	for(i=0;i<ring_size;i++)
+	{
+		if((ring[i].owner == -1) && (ring[i].reserved_for == -1))
+			cmpt = 0;
+		else
+			cmpt++;
+		if(cmpt > max)
+			max = cmpt;
+	}
+	i=0;
+	if(cmpt > 0) //if the last slot is used
+	{
+
+		while((ring[i].owner != -1) || (ring[i].reserved_for != -1))
+		{
+			//printf("%d %d %d\n",i,ring[i].owner,ring[i].reserved_for);
+			cmpt++;
+			i++;
+			if(cmpt > max)
+				max = cmpt;
+			if(i==ring_size)
+				return ring_size;
+		}
+	}
+	return max;
+}
+
+int average_chain_length(Packet* ring, int ring_size)
+{
+	int begin = -1;
+	int cmpt = 0;
+	int average = 0;
+	int nb_chains = 0;
+	for(int i=0;i<ring_size;i++)
+	{
+		if((ring[i].owner == -1) && (ring[i].reserved_for == -1))
+		{
+			begin = i;
+			break;
+		}
+	}
+	if(begin == -1)
+		return ring_size;
+	for(int i=begin;i<ring_size+begin;i++)
+	{
+		//printf("%d,%d[%d][%d] %d %d\n",i,begin,ring[i%ring_size].owner,ring[i%ring_size].reserved_for,cmpt,nb_chains);
+		if((ring[i%ring_size].owner == -1) && (ring[i%ring_size].reserved_for == -1))
+		{
+			average += cmpt;
+			cmpt = 0;
+		}
+		else
+ 		{
+
+ 			if(cmpt == 0)
+ 			{
+ 				nb_chains++;
+ 			}
+			cmpt++;
+		}
+	}
+	if((ring[ring_size+begin-1].owner != -1) || (ring[ring_size+begin-1].reserved_for != -1))
+	{
+		average+=cmpt; 
+		nb_chains++;
+	}
+	if (nb_chains == 0)return 0;
+	return average / nb_chains;
+}
+void print_ring(Packet* ring, int ring_size)
+{
+	for(int i=0;i<ring_size;i++)
+	{
+		printf("[%d,%d,%d] ",i,ring[i].owner,ring[i].reserved_for);
+	}
+	printf("\n");
+}
+
+float simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minimal_buffer_size,int deadline,int nb_BBU,int size_CRAN,int size_BE,int packet_size, int emission_time, int emission_gap,Policy mode, int simulation_lenght,int time_before_measure, int max_size,float * tab_BE,float* tab_CRAN,float* tab_ANSWERS,float * tab_BE_BBU, int tab_size , float *** vectors,float ** chain, int* state, int res_kind)
 {
 
 	Packet* ring = init_ring(ring_size);
 	int ** nodes_positions = init_nodes_positions(nb_nodes,ring_size);
 	int* antenas_distrib = init_nb_antenas(nb_nodes,nb_antenas);
+
+	FILE* train_long_file = fopen("../datas/train.data","w");
+	if(!train_long_file){perror("Opening \"../datas/train.data\" failure\n");exit(2);}
 
 	int ** shift = NULL;
 	if(mode == SPLIT_FREQ)
@@ -158,7 +245,7 @@ float simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minima
 			case NO_MANAGMENT:
 				generation_CRAN(BE_Q,nodes_antenas,nb_nodes,nb_antenas,current_slot,size_CRAN,size_BE,nb_BBU,period,max_size,emission_time,emission_gap,antenas_distrib,mode,nodes_positions,ring_size,shift);
 				generation_answers(ring,nodes_positions,BE_Q,nb_BBU,ring_size,current_slot, size_CRAN,size_BE,mode,max_size);
-				load += (float)insert_packets(BE_Q,BE_Q,ring,nodes_positions,packet_size,minimal_buffer_size,mode,nb_nodes,size_CRAN,size_BE,max_size,current_slot,nb_BBU,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU, time_before_measure,tab_size);
+				load += (float)insert_packets(BE_Q,BE_Q,ring,nodes_positions,packet_size,minimal_buffer_size,deadline,mode,nb_nodes,size_CRAN,size_BE,max_size,current_slot,nb_BBU,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU, time_before_measure,tab_size);
 				
 			break;
 			default:
@@ -166,15 +253,24 @@ float simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minima
 				generation_answers(ring,nodes_positions,CRAN_Q,nb_BBU,ring_size,current_slot, size_CRAN,size_BE,mode,max_size);
 				if(mode != CRAN_FIRST)
 					reservation_management(ring, ring_size, nodes_antenas, nodes_positions,nb_nodes, current_slot,nb_BBU, period, emission_time, emission_gap, antenas_distrib,mode,shift);
-				load += (float)insert_packets(BE_Q,CRAN_Q,ring,nodes_positions,packet_size,minimal_buffer_size,mode,nb_nodes,size_CRAN,size_BE,max_size,current_slot,nb_BBU,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU ,time_before_measure,tab_size);
+				load += (float)insert_packets(BE_Q,CRAN_Q,ring,nodes_positions,packet_size,minimal_buffer_size,deadline,mode,nb_nodes,size_CRAN,size_BE,max_size,current_slot,nb_BBU,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU ,time_before_measure,tab_size);
 			break;
+
+			
 		}
 		
 		remove_packets(nodes_positions,ring,nb_nodes,ring_size);
+		fprintf(train_long_file,"%d %d %d\n",current_slot,max_chain_length(ring,ring_size),average_chain_length(ring,ring_size));
+		//fprintf(stdout,"%d %d %d\n",current_slot,max_chain_length(ring,ring_size),average_chain_length(ring,ring_size));
+		//print_ring(ring, ring_size);
 		rotate_ring(ring,ring_size);
+		//if(current_slot == 200)exit(40);
+
+
 	}
 	if(DEBUG)printf("\n Real Load = %f\n",load/simulation_lenght);
 
+	fclose(train_long_file);
 	if(shift)free(shift);
 	free(ring);
 	free(antenas_distrib);

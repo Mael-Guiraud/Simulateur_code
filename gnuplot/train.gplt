@@ -1,0 +1,11 @@
+plot '../datas/train.data' using 1:2 smooth bezier title "max length" 
+replot '../datas/train.data' using 1:3 smooth bezier title "average lenght"
+
+set term postscript color solid
+
+set title "Taille des trains de messages au cours du temps"
+set xlabel "{/Symbol m}s" 
+set key bottom right 
+set ylabel "Taille du train en nombre de slots"
+set output '| ps2pdf - ../gnuplot/Train.pdf'
+replot

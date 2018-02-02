@@ -1,14 +1,14 @@
-plot '../datas/be_distrib.data' title "BE" smooth frequency
-replot '../datas/be_bbu_distrib.data' title "BBU BE" smooth frequency
-replot '../datas/cran_distrib.data' title "Uplink" smooth frequency
-replot '../datas/answers_distrib.data' title "Downlink" smooth frequency
+plot '../datas/be_distrib.data' smooth cumulative title "BE" 
+replot '../datas/be_bbu_distrib.data' title "BBU BE" smooth cumulative
+replot '../datas/cran_distrib.data' title "Uplink" smooth cumulative
+replot '../datas/answers_distrib.data' title "Downlink" smooth cumulative
 set term postscript color solid
-set xrange [0:200]
-set yrange [0:40]
-set title "Distribution of the latency for differents traffics"
-set xlabel "{/Symbol m}s" 
-set xtics 10
+set xrange [0:500] 
+set yrange [0:100] 
+set title "Cumulative distribution of the latency for differents traffics"
+set xlabel "Latency ({/Symbol m}s)" 
 set ytics 10
+set key bottom right 
 set ylabel "Distribution (%)"
-set output '| ps2pdf - ../gnuplot/Insertion_management.pdf'
+set output '| ps2pdf - ../gnuplot/prior.pdf'
 replot

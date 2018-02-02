@@ -24,20 +24,21 @@ int main()
 
 	int max_size = 1000000; // buffer max of the queues
 
-	int minimal_buffer_size = 7000;
-	int size_CRAN = 10000;
-	int size_BE =15;
-	int packet_size = 10000;
+	int minimal_buffer_size = 70000;
+	int deadline = 10;
+	int size_CRAN = 100000;
+	int size_BE =1000;
+	int packet_size = 100000;
 
 	//Policy mode = NO_MANAGMENT;
 	Policy mode = CRAN_FIRST;
 	//Policy mode = RESERVATION;
 	//Policy mode = SPLIT_FREQ;
-	int res_kind = 2;
-	int simulation_lenght = 5000;
+	int res_kind = 3;
+	int simulation_lenght = 10000;
 
 	int nb_simuls= 100;
-	int time_before_measure = 2000;
+	int time_before_measure = 3000;
 
 
 	//Generation of best effort parameters
@@ -47,12 +48,12 @@ int main()
 	float *** vectors = init_vectors(nb_states);
 	float ** chain = init_chain(nb_states);
 	read_SBBP_file(chain,vectors,nb_states,nb_elems);
-
+	stationary_distribution(chain, nb_states);
 	
 	int table_size = 50000; //Upgrade this value if the programs answers that the table to save the datas is too short
 
 	char name[64];
-	sprintf(name,"../gnuplot/Insertion_management.pdf"); // name of the output pdf
+	sprintf(name,"../gnuplot/prior.pdf"); // name of the output pdf
 
 	float Average_load = 0.0;
 	float max_load = 0.0;
@@ -72,7 +73,7 @@ int main()
 	for(int i=0;i<nb_simuls;i++	)
 	{
 		fprintf(stdout,"\r Step %d/%d",i+1,nb_simuls);fflush(stdout);
-		load = simulate(ring_size,nb_nodes,nb_antenas,period,minimal_buffer_size,nb_BBU,size_CRAN,size_BE,packet_size,emission_time,emission_gap, mode,simulation_lenght,time_before_measure, max_size,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU,table_size,vectors,chain,&state, res_kind);
+		load = simulate(ring_size,nb_nodes,nb_antenas,period,minimal_buffer_size,deadline,nb_BBU,size_CRAN,size_BE,packet_size,emission_time,emission_gap, mode,simulation_lenght,time_before_measure, max_size,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU,table_size,vectors,chain,&state, res_kind);
 		Average_load += load;
 		max_load = f_max(max_load,load);
 		min_load = f_min(min_load,load);
