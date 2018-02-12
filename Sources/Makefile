@@ -30,8 +30,8 @@ profile: prog
 	valgrind --tool=callgrind --dump-instr=yes --simulate-cache=yes --collect-jumps=yes ./prog 
 	$(PROFILING) 
 
-prog: $(DIRbin)main.o $(DIRbin)message_generation.o $(DIRbin)simulator.o $(DIRbin)data_treatment.o $(DIRbin)sbbp.o
-	$(CC) -lm -o prog $(DIRbin)main.o $(DIRbin)message_generation.o $(DIRbin)simulator.o $(DIRbin)data_treatment.o $(DIRbin)sbbp.o
+prog: $(DIRbin)main.o $(DIRbin)message_generation.o $(DIRbin)simulator.o $(DIRbin)data_treatment.o $(DIRbin)bemodel.o
+	$(CC) -lm -o prog $(DIRbin)main.o $(DIRbin)message_generation.o $(DIRbin)simulator.o $(DIRbin)data_treatment.o $(DIRbin)bemodel.o
 
 $(DIRbin)main.o: main.c struct.h
 	$(CC) $(CFLAGS) main.c -o $(DIRbin)main.o 
@@ -45,8 +45,8 @@ $(DIRbin)simulator.o: simulator.c struct.h
 $(DIRbin)data_treatment.o: data_treatment.c
 	$(CC) $(CFLAGS) data_treatment.c -o $(DIRbin)data_treatment.o 
 
-$(DIRbin)sbbp.o: sbbp.c
-	$(CC) $(CFLAGS) sbbp.c -o $(DIRbin)sbbp.o 
+$(DIRbin)bemodel.o: bemodel.c
+	$(CC) $(CFLAGS) bemodel.c -o $(DIRbin)bemodel.o 
 
 create_folder:
 	mkdir -p $(DIRbin)

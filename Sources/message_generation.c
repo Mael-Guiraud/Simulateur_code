@@ -5,7 +5,7 @@
 
 
 #include "struct.h"
-#include "sbbp.h"
+#include "bemodel.h"
 
 int min(int a, int b)
 {
@@ -224,9 +224,10 @@ void free_nodes_antenas(int ** nodes, int nb_nodes,int nb_BBU)
 		free(nodes[i]);
 	free(nodes);
 }
-
+/*
 void generation_BE(Queue * BE_Q, int nb_nodes,int size_BE, int current_slot, int max_size, float *** vectors,float ** chain, int* state)
 {
+
 	int number_generated;
 
 	*state= change_state(chain, *state);
@@ -247,6 +248,26 @@ void generation_BE(Queue * BE_Q, int nb_nodes,int size_BE, int current_slot, int
 
 	}
 
+}*/
+
+void generation_BE(Queue* BE_Q, int nb_nodes, int size_BE, int current_slot, int max_size,float * distrib_be_generation, int deadline,int * be_offset_generation)
+{
+	for(int i=0;i<nb_nodes;i++)
+	{
+		if(be_offset_generation[i]==0)
+		{
+			BE_Q[i].size += size_BE;
+			BE_Q[i].queue[BE_Q[i].max_id] = current_slot; 
+			BE_Q[i].kind[BE_Q[i].max_id] = 1; 
+			BE_Q[i].max_id= (BE_Q[i].max_id+1)%max_size;
+			be_offset_generation[i] = inverse_transform(distrib_be_generation,deadline);
+		}
+		else
+		{
+			be_offset_generation[i]--;
+		}
+	}
+	
 }
 
 void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_antenas, int current_slot, int size_CRAN,int size_BE,int nb_BBU, int period, int max_size, int emission_time, int emission_gap,int * antenas_distrib,Policy mode,int ** nodes_positions,int ring_size,int ** shift)

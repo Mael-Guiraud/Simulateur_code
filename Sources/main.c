@@ -7,7 +7,8 @@
 #include "struct.h"
 #include "data_treatment.h"
 #include "simulator.h"
-#include "sbbp.h"
+#include "bemodel.h"
+
 
 int main()
 {
@@ -16,18 +17,18 @@ int main()
 	int nb_nodes=5;
 	int nb_BBU=1;
 
-	int nb_antenas=12;
+	int nb_antenas=5;
 	int period=1000;
 
-	int emission_time = 200;
+	int emission_time = 500;
 	int emission_gap = 10;
 
 	int max_size = 1000000; // buffer max of the queues
 
 	int minimal_buffer_size = 70000;
-	int deadline = 10;
+	int deadline = 15;
 	int size_CRAN = 100000;
-	int size_BE =1000;
+	int size_BE =100000;
 	int packet_size = 100000;
 
 	//Policy mode = NO_MANAGMENT;
@@ -37,19 +38,19 @@ int main()
 	int res_kind = 5;
 	int simulation_lenght = 10000;
 
-	int nb_simuls= 1;
+	int nb_simuls= 100;
 	int time_before_measure = 3000;
 
 
 	//Generation of best effort parameters
-	int state = 0;
-	int nb_states = 2 ; //depends of the SBBP model
-	int nb_elems[nb_states];
-	float *** vectors = init_vectors(nb_states);
-	float ** chain = init_chain(nb_states);
-	read_SBBP_file(chain,vectors,nb_states,nb_elems);
-	stationary_distribution(chain, nb_states);
-	
+	float distrib_be_generation[deadline];
+	read_param_file(distrib_be_generation, deadline);
+	int  be_offset_generation[nb_nodes];
+	for(int i=0;i<nb_nodes;i++)
+	{
+		be_offset_generation[i]=0;
+	}
+
 	int table_size = 50000; //Upgrade this value if the programs answers that the table to save the datas is too short
 
 	char name[64];
@@ -73,7 +74,7 @@ int main()
 	for(int i=0;i<nb_simuls;i++	)
 	{
 		fprintf(stdout,"\r Step %d/%d",i+1,nb_simuls);fflush(stdout);
-		load = simulate(ring_size,nb_nodes,nb_antenas,period,minimal_buffer_size,deadline,nb_BBU,size_CRAN,size_BE,packet_size,emission_time,emission_gap, mode,simulation_lenght,time_before_measure, max_size,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU,table_size,vectors,chain,&state, res_kind);
+		load = simulate(ring_size,nb_nodes,nb_antenas,period,minimal_buffer_size,deadline,nb_BBU,size_CRAN,size_BE,packet_size,emission_time,emission_gap, mode,simulation_lenght,time_before_measure, max_size,tab_BE,tab_CRAN,tab_ANSWERS,tab_BE_BBU,table_size,distrib_be_generation,be_offset_generation,res_kind);
 		Average_load += load;
 		max_load = f_max(max_load,load);
 		min_load = f_min(min_load,load);
@@ -86,8 +87,6 @@ int main()
 
 	print_gnuplot(name);
 
-	free_chain(chain,nb_states);
-	free_vectors(vectors,nb_states, nb_elems);
 	free(tab_ANSWERS);
 	free(tab_BE);
 	free(tab_BE_BBU);

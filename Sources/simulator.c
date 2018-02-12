@@ -208,8 +208,9 @@ void print_ring(Packet* ring, int ring_size)
 	printf("\n");
 }
 
-float simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minimal_buffer_size,int deadline,int nb_BBU,int size_CRAN,int size_BE,int packet_size, int emission_time, int emission_gap,Policy mode, int simulation_lenght,int time_before_measure, int max_size,float * tab_BE,float* tab_CRAN,float* tab_ANSWERS,float * tab_BE_BBU, int tab_size , float *** vectors,float ** chain, int* state, int res_kind)
+float simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minimal_buffer_size,int deadline,int nb_BBU,int size_CRAN,int size_BE,int packet_size, int emission_time, int emission_gap,Policy mode, int simulation_lenght,int time_before_measure, int max_size,float * tab_BE,float* tab_CRAN,float* tab_ANSWERS,float * tab_BE_BBU, int tab_size , float *distrib_be_generation,int * be_offset_generation, int res_kind)
 {
+
 
 	Packet* ring = init_ring(ring_size);
 	int ** nodes_positions = init_nodes_positions(nb_nodes,ring_size);
@@ -238,7 +239,7 @@ float simulate(int ring_size, int nb_nodes,int nb_antenas, int period,int minima
 		//printf("\n");
 		if(current_slot > 10*ring_size)
 		{
-			generation_BE(BE_Q,nb_nodes,size_BE,current_slot,max_size,vectors,chain,state);
+			generation_BE(BE_Q,nb_nodes,size_BE,current_slot,max_size,distrib_be_generation,deadline,be_offset_generation);
 		}
 		switch(mode)
 		{
