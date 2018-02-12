@@ -147,9 +147,12 @@ void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode,int ** nodes
 					 	if(nb_antenas % nb_antenas_per_freq )
 					 		nb_freq_needed++;
 					 	repartition = repart(nb_freq_needed,emission_gap/2);
+					 	repartition_inter = repart(nb_freq_needed,period);
 					 	freq_id = antena_id / nb_antenas_per_freq;
 					 	pos_in_freq = antena_id % nb_antenas_per_freq;
-					 	antenas[i] = (repartition[freq_id]*2+1 + pos_in_freq*emission_time - (nodes_positions[node_id][0] -1) +period)%period;
+					 	antenas[i] = (repartition[freq_id]*2+1 + pos_in_freq*emission_time - (nodes_positions[node_id][0] -1)+repartition_inter[freq_id] +period)%period;
+					 	free(repartition);
+					 	free(repartition_inter);
 					 	//printf("%d %d %d %d %d \n",antena_id,nb_antenas_per_freq,nb_freq_needed,freq_id,antenas[i]);
 				 	break;
 

@@ -10,5 +10,5 @@ set xlabel "Latency ({/Symbol m}s)"
 set ytics 10
 set key bottom right 
 set ylabel "Distribution (%)"
-set output '| ps2pdf - ../gnuplot/prior.pdf'
+set output '| ps2pdf - ../gnuplot/opti.pdf'
 replot
