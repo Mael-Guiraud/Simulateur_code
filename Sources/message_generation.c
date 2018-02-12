@@ -150,10 +150,10 @@ void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode,int ** nodes
 					 	repartition_inter = repart(nb_freq_needed,period);
 					 	freq_id = antena_id / nb_antenas_per_freq;
 					 	pos_in_freq = antena_id % nb_antenas_per_freq;
-					 	antenas[i] = (repartition[freq_id]*2+1 + pos_in_freq*emission_time - (nodes_positions[node_id][0] -1)+repartition_inter[freq_id] +period)%period;
+					 	antenas[i] = (repartition[freq_id]*2+1 + pos_in_freq*emission_time - (nodes_positions[node_id][0] -1)+repartition_inter[freq_id]  +period)%period;
 					 	free(repartition);
 					 	free(repartition_inter);
-					 	//printf("%d %d %d %d %d \n",antena_id,nb_antenas_per_freq,nb_freq_needed,freq_id,antenas[i]);
+					 	printf("%d %d %d %d %d %d %d\n",antena_id,nb_antenas_per_freq,nb_freq_needed,freq_id,antenas[i],pos_in_freq,nodes_positions[node_id][0]);
 				 	break;
 
 		
@@ -496,7 +496,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 										if(current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id] < table_Size)
 										{
 											if(i<nb_BBU)
-												tab_BE_BBU[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
+												tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
 											else
 												tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
 										}
@@ -607,7 +607,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 									{
 										if(i<nb_BBU)
 										{
-											tab_BE_BBU[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
+											tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
 
 										}
 										else
@@ -653,7 +653,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 									if(current_slot-BE_Q[i].queue[BE_Q[i].min_id] < table_Size)
 									{
 										if(i<nb_BBU)
-											tab_BE_BBU[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
+											tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
 										else
 											tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
 									}

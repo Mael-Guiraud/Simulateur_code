@@ -16,10 +16,10 @@ int main()
 	int nb_nodes=5;
 	int nb_BBU=1;
 
-	int nb_antenas=25;
+	int nb_antenas=12;
 	int period=1000;
 
-	int emission_time = 100;
+	int emission_time = 200;
 	int emission_gap = 10;
 
 	int max_size = 1000000; // buffer max of the queues
@@ -31,13 +31,13 @@ int main()
 	int packet_size = 100000;
 
 	//Policy mode = NO_MANAGMENT;
-	Policy mode = CRAN_FIRST;
-	//Policy mode = RESERVATION;
+	//Policy mode = CRAN_FIRST;
+	Policy mode = RESERVATION;
 	//Policy mode = SPLIT_FREQ;
 	int res_kind = 5;
 	int simulation_lenght = 10000;
 
-	int nb_simuls= 100;
+	int nb_simuls= 1;
 	int time_before_measure = 3000;
 
 
