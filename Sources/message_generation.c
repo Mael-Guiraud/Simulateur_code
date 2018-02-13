@@ -153,7 +153,7 @@ void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode,int ** nodes
 					 	antenas[i] = (repartition[freq_id]*2+1 + pos_in_freq*emission_time - (nodes_positions[node_id][0] -1)+repartition_inter[freq_id]  +period)%period;
 					 	free(repartition);
 					 	free(repartition_inter);
-					 	printf("%d %d %d %d %d %d %d\n",antena_id,nb_antenas_per_freq,nb_freq_needed,freq_id,antenas[i],pos_in_freq,nodes_positions[node_id][0]);
+					 	//printf("%d %d %d %d %d %d %d\n",antena_id,nb_antenas_per_freq,nb_freq_needed,freq_id,antenas[i],pos_in_freq,nodes_positions[node_id][0]);
 				 	break;
 
 		
@@ -545,7 +545,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 											//fprintf(f_ANSWERS,"%d\n",current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]);
 											if(current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id] < table_Size)
 											{
-												tab_ANSWERS[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
+												tab_CRAN[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
 
 											}
 											else
@@ -589,7 +589,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 								{
 									if(i<nb_BBU)
 									{
-										tab_ANSWERS[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
+										tab_CRAN[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
 										
 									}
 									else
