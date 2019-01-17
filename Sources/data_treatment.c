@@ -82,18 +82,18 @@ void print_gnuplot(char * name)
 
 	fprintf(f_GPLT,"plot '../datas/be_distrib.data' smooth cumulative title \"BE traffic\" \n"
 	//"replot '../datas/be_bbu_distrib.data' title \"BBU BE\" smooth cumulative\n"
-	//"replot '../datas/cran_distrib.data' title \"C-RAN traffic\" smooth cumulative\n"
+	"replot '../datas/cran_distrib.data' title \"C-RAN traffic\" smooth cumulative\n"
 	//"replot '../datas/answers_distrib.data' title \"Downlink traffic\" smooth cumulative\n"
 	"set term postscript color solid\n"
 
 	"set xrange [0:200] \n"
 	"set yrange [0:100] \n"
 	"set title \"Cumulative distribution of the sojourn time\"\n"
-	"set xlabel \"Latency ({/Symbol m}s)\" \n"
+	"set xlabel \"Sojourn time ({/Symbol m}s)\" \n"
 	//"set xtics 10\n" 
 	"set ytics 10\n" 
 	"set key bottom right \n"
-	"set ylabel \"Distribution (%%)\"\n"
+	"set ylabel \"Cumulative Distribution (%%)\"\n"
 	"set output '| ps2pdf - %s'\nreplot\n",name);
 	fclose(f_GPLT);
 

@@ -1,0 +1,21 @@
+plot '../datas/cran_distrib_CRAN1000.data' smooth cumulative linestyle 3 lc 7 lw 3 title "C-RAN with C-RAN priority" 
+replot '../datas/be_distrib_CRAN1000.data' smooth cumulative linestyle 0 lc 7 lw 10 title "BE with C-RAN priority" 
+replot '../datas/cran_distrib_opport1000.data' smooth cumulative linestyle 4 lc 3 lw 3 title "C-RAN with FIFO" 
+replot '../datas/be_distrib_opport1000.data' smooth cumulative linestyle 0 lc 3 lw 10 title "BE with FIFO" 
+
+
+
+set term postscript color solid
+set xrange [0:200] 
+set yrange [0:100] 
+set notitle 
+set xlabel "Latency ({/Symbol m}s)" 
+set ytics 10
+set xlabel font ",20"
+set ylabel font ",20"
+set size ratio 0.5
+set key font ",15"
+set key bottom right 
+set ylabel "Cumulative Distribution (%)"
+set output '| ps2pdf - ../gnuplot/opport.pdf'
+replot

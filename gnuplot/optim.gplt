@@ -1,12 +1,20 @@
-plot '../datas/be_distrib_opport.data' smooth cumulative title "Full Opportunistic" 
-replot '../datas/be_distrib_opti.data' smooth cumulative title "Full repartition" 
+plot '../datas/be_distrib_opport12.data' smooth cumulative linestyle 1 lc 1 lw 10 title "BE with FIFO" 
+#replot '../datas/be_distrib.data' smooth cumulative linestyle 1 lc 2 lw 10 title "BE with Optim" 
+replot '../datas/cran_distrib_opport12.data' smooth cumulative linestyle 0 lc 6 lw 5 title "C-RAN with FIFO" 
+replot '../datas/be_distrib_opti.data' smooth cumulative linestyle 1 lc 7 lw 10 title "BE with Reservation" 
+replot '../datas/cran_distrib_opti.data' pt 0 lc 2 lw 20 title "C-RAN with Reservation" 
+
 set term postscript color solid
-set xrange [0:200] 
+set xrange [0:150] 
 set yrange [0:100] 
-set title "Cumulative distribution of the sojourn time"
+set notitle 
 set xlabel "Latency ({/Symbol m}s)" 
 set ytics 10
+set xlabel font ",25"
+set ylabel font ",25"
+set key font ",20"
+set size ratio 0.75
 set key bottom right 
-set ylabel "Distribution (%)"
+set ylabel "Cumulative Distribution (%)"
 set output '| ps2pdf - ../gnuplot/optim.pdf'
 replot

@@ -1,0 +1,18 @@
+plot '../datas/be_distrib_split.data' smooth cumulative linestyle 1 lc 1 lw 5 title "BE with Split" 
+replot '../datas/be_distrib_opport5.data' smooth cumulative linestyle 1 lc 2 lw 5 title "BE with FIFO" 
+replot '../datas/be_distrib_resa5ant.data' smooth cumulative linestyle 1 lc 3 lw 5 title "BE with balancing into the period" 
+
+set term postscript color solid
+set xrange [0:150] 
+set yrange [0:100] 
+set notitle 
+set xlabel "Latency ({/Symbol m}s)" 
+set ytics 10
+set xlabel font ",25"
+set ylabel font ",25"
+set key font ",20"
+set size ratio 0.75
+set key bottom right 
+set ylabel "Cumulative Distribution (%)"
+set output '| ps2pdf - ../gnuplot/split.pdf'
+replot

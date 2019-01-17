@@ -1,11 +1,12 @@
 plot '../datas/be_distrib.data' smooth cumulative title "BE traffic" 
+replot '../datas/cran_distrib.data' title "C-RAN traffic" smooth cumulative
 set term postscript color solid
 set xrange [0:200] 
 set yrange [0:100] 
 set title "Cumulative distribution of the sojourn time"
-set xlabel "Latency ({/Symbol m}s)" 
+set xlabel "Sojourn time ({/Symbol m}s)" 
 set ytics 10
 set key bottom right 
-set ylabel "Distribution (%)"
-set output '| ps2pdf - ../gnuplot/opti.pdf'
+set ylabel "Cumulative Distribution (%)"
+set output '| ps2pdf - ../gnuplot/res2.pdf'
 replot
