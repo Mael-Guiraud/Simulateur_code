@@ -39,7 +39,7 @@ int main()
 	int simulation_lenght = 1000000;
 	
 
-	int nb_simuls= 100;
+	int nb_simuls= 1;
 	int time_before_measure = 3000;
 
 
