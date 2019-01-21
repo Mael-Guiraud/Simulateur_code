@@ -79,7 +79,7 @@ int nb_previous(int * inters, int nb_inters,int antena_id)
 void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode,int ** nodes_positions, int node_id, int * antenas_distrib, int nb_nodes,int res_kind,int emission_gap, int emission_time,int ring_size, int ** shift)
 {
 	int antena_id;
-
+	int cumulantennas[5];
 	int* repartition, * repartition_inter ;
 	int nb_macro_inters;
 	int inter_idt;
@@ -95,15 +95,28 @@ void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode,int ** nodes
 	int pos_in_freq;
 	int gap_in_period;
 	int offset ;
-	int current_freq;
-	int first;
+	int current_freq,current_node;
+	int nb_CRAN;
+	int prov;
+	for(int i=0;i<5;i++)cumulantennas[i]=0;
+	cumulantennas[0] = antenas_distrib[0];
+	for(int i=1;i<5;i++)
+	{
+		cumulantennas[i] = cumulantennas[i-1] +antenas_distrib[i];
+		
+	}
 	for(int i=0;i<antenas_distrib[node_id];i++)
 	{
-		if(i==0)
+		/*if(i==0)
 			antena_id = node_id-1;
 		else
 			antena_id = (i)*nb_nodes + node_id-i-1;
-		
+		*/
+		antena_id = 0;
+		for(int j=0;j<node_id;j++)
+			antena_id += antenas_distrib[j];
+		printf("%d %d %d\n",antena_id,i,node_id);
+		antena_id += i;
 		switch(mode){
 			case RESERVATION:
 				switch(res_kind)
@@ -178,61 +191,34 @@ void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode,int ** nodes
 
 			break;
 			case SPLIT_FREQ:
-			/*
-				 offset =ring_size;
+			
+				 offset =0;
 				 current_freq = 0;
-				 first = 0;
-				for(int j =0;j<antena_id;j++)
+				 nb_CRAN = 0;
+				for(int j =0;j<=antena_id;j++)
 				{
-					if((offset+emission_time) <= period)
+					if((nb_CRAN+emission_time) <= period)
 					{
-						if(first)
-						{
-							offset += ring_size;
-							first = 0;
-						}
-						offset +=  emission_time;
+
+						nb_CRAN +=  emission_time;
 					}
 					else
 					{
-						offset =  (offset+emission_time - period);
+						prov = (nb_CRAN - (period-ring_size));
+						nb_CRAN +=  prov;
 						current_freq = current_freq+2;
-						first = 1;
+
 					}
 				}
 			
-				antenas[i] = (current_freq  - nodes_positions[node_id][0]  +  offset +period)%period; 
+				antenas[i] = (current_freq +  nb_CRAN +period)%period; 
 				if( (offset+ emission_time) <= period)
 					shift[node_id][i] = emission_time;
 				else
-					shift[node_id][i] = period-offset;
+					shift[node_id][i] = prov;
 				printf("Antenna %d offset %d node[i] %d current_freq %d shift %d nodeid %d distance %d \n",antena_id,offset,antenas[i],current_freq,shift[node_id][i],node_id, nodes_positions[node_id][0]);
-				*/
-				switch(antena_id)
-				{
-					case 0:
-						antenas[i] = 20;
-						shift[node_id][i] = 500 ;
-					break;
+			
 
-					case 1:
-						antenas[i] = 540;
-						shift[node_id][i] = 400 ;
-					break;
-					case 2:
-						antenas[i] = 162;
-						shift[node_id][i] = 500 ;
-					break;
-					case 3:
-						antenas[i] = 682;
-						shift[node_id][i] = 300 ;
-					break;
-					case 4:
-						antenas[i] = 224;
-						shift[node_id][i] = 500 ;
-					break;
-
-				}
 				
 			break;
 			default:

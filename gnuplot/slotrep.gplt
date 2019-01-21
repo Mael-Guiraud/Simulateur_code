@@ -1,5 +1,5 @@
 
-plot '../datas/be_distrib_res_1.data' title "Baseline" smooth cumulative dt 2 lw 4 lc 1
+plot '../datas/be_distrib_res_1.data' title "Naive Assignment" smooth cumulative dt 2 lw 4 lc 1
 replot '../datas/be_distrib_res_3.data' title "Compacting positions" smooth cumulative lw 4 dt 1 lc 2
 
 #replot '../datas/be_distrib_res_6.data' title "Balancing inside the period" smooth cumulative dt 3 lw 4 lc 2
