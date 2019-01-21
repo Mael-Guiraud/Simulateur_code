@@ -683,7 +683,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 							if (ring[writing_Slot].reserved_for == i)
 							{
 								inserted++;
-								printf("Ca arrive ?\n");
+								
 							}
 						}
 
