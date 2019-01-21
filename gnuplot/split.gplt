@@ -1,4 +1,4 @@
-plot '../datas/be_distrib_split.data' smooth cumulative linestyle 1 lc 1 lw 5 title "BE with Split" 
+plot '../datas/be_distrib.data' smooth cumulative linestyle 1 lc 1 lw 5 title "BE with Split" 
 replot '../datas/be_distrib_opport5.data' smooth cumulative linestyle 1 lc 2 lw 5 title "BE with FIFO" 
 replot '../datas/be_distrib_resa5ant.data' smooth cumulative linestyle 1 lc 3 lw 5 title "BE with balancing into the period" 
 

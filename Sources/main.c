@@ -17,7 +17,7 @@ int main()
 	int nb_nodes=5;
 	int nb_BBU=1;
 
-	int nb_antenas=4;
+	int nb_antenas=5;
 	int period=1000;
 
 	int emission_time =500;
@@ -33,8 +33,8 @@ int main()
 
 	//Policy mode = NO_MANAGMENT;
 	//Policy mode = CRAN_FIRST;
-	//Policy mode = RESERVATION;
-	Policy mode = SPLIT_FREQ;
+	Policy mode = RESERVATION;
+	//Policy mode = SPLIT_FREQ;
 	int res_kind = 2;
 	int simulation_lenght = 1000000;
 	
