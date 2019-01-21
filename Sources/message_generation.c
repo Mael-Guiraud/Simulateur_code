@@ -639,100 +639,52 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 							CRAN_Q[i].min_id= (CRAN_Q[i].min_id+1)%max_size;
 						}
 						ring[writing_Slot].nb_CRAN = cran_to_write;
-						if(BE_Q[i].size > 0)
-						{
-						
-							if( BE_Q[i].size >  (packet_size - cran_to_write) )
-							{
-								gap = packet_size - CRAN_Q[i].size;
-								BE_Q[i].size -= (packet_size - cran_to_write);
-								
-							}
-							else
-							{
-								gap = BE_Q[i].size;
-								BE_Q[i].size = 0;
-								
-							}
-							
-							for(int j=0;j<gap/size_BE;j++)
-							{
-								if(current_slot>time_before_measure)
-								{
-									if(current_slot-BE_Q[i].queue[BE_Q[i].min_id] < table_Size)
-									{
-										if(i<nb_BBU)
-										{
-											tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
-
-										}
-										else
-										{
-											tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
-
-										}
-									}
-									else
-									{
-										printf("Warning : The table to save the datas is too short\n");
-									}
-									//fprintf(f_BE,"%d\n",current_slot-BE_Q[i].queue[BE_Q[i].min_id]);
-								}
-								BE_Q[i].queue[BE_Q[i].min_id] = -1;
-								BE_Q[i].min_id= (BE_Q[i].min_id+1)%max_size;
-							}
-
-						}
+			
 						CRAN_Q[i].size -= cran_to_write;
 						ring[writing_Slot].reserved_for = -1;
 
-						if(DEBUG)printf(".\n");
-						/*if(ring[writing_Slot].pre_reserved != -1)
-						{
-							ring[writing_Slot].reserved_for = ring[writing_Slot].pre_reserved;
-							ring[writing_Slot].pre_reserved = -1;
-						}*/
+						
 					}
 					else // No CRAN
 					{
-						//printf("%d \n",BE_Q[i].size);
-						if((BE_Q[i].size>=minimal_buffer_size)||( (BE_Q[i].size>0)&&( current_slot-BE_Q[i].queue[BE_Q[i].min_id] >= deadline  )))
+						
+						if(BE_Q[i].size>0)
 						{
 							inserted++;
 							if(DEBUG)printf("BE packet at node %d.\n",i);
 							ring[writing_Slot].owner = i;
 							ring[writing_Slot].nb_CRAN = 0;
-							be_to_write = min (BE_Q[i].size,packet_size);
-		
-							for(int j=0;j<be_to_write/size_BE;j++)
-							{	
+	
 
-								if(current_slot>time_before_measure)	
+							if(current_slot>time_before_measure)	
+							{
+								//fprintf(f_BE,"%d\n",current_slot-BE_Q[i].queue[BE_Q[i].min_id]);
+								if(current_slot-BE_Q[i].queue[BE_Q[i].min_id] < table_Size)
 								{
-									//fprintf(f_BE,"%d\n",current_slot-BE_Q[i].queue[BE_Q[i].min_id]);
-									if(current_slot-BE_Q[i].queue[BE_Q[i].min_id] < table_Size)
-									{
-										if(i<nb_BBU)
-											tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
-										else
-											tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
-									}
+									if(i<nb_BBU)
+										tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
 									else
-									{
-										printf("Warning : The table to save the datas is too short\n");
-									}
+										tab_BE[current_slot-BE_Q[i].queue[BE_Q[i].min_id]]++;
 								}
-								BE_Q[i].queue[BE_Q[i].min_id] = -1;                                                                                  
-								BE_Q[i].min_id= (BE_Q[i].min_id+1)%max_size;	
+								else
+								{
+									printf("Warning : The table to save the datas is too short\n");
+								}
 							}
-							BE_Q[i].size -= be_to_write;
+							BE_Q[i].queue[BE_Q[i].min_id] = -1;                                                                                  
+							BE_Q[i].min_id= (BE_Q[i].min_id+1)%max_size;	
+							
+							BE_Q[i].size -= size_BE;
 							ring[writing_Slot].reserved_for = -1;
 							
 						}
 						else
 						{
 							if (ring[writing_Slot].reserved_for == i)
+							{
 								inserted++;
+								printf("Ca arrive ?\n");
+							}
 						}
 
 					}
