@@ -28,19 +28,19 @@ int main()
 	int minimal_buffer_size = 70000;
 	int deadline = 15;
 	int size_CRAN = 100000;
-	int size_BE =100000;
+	int size_BE =0;
 	int packet_size = 100000;
 
 	//Policy mode = NO_MANAGMENT;
 	//Policy mode = CRAN_FIRST;
-	Policy mode = RESERVATION;
-	//Policy mode = SPLIT_FREQ;
+	//Policy mode = RESERVATION;
+	Policy mode = SPLIT_FREQ;
 	int res_kind = 2;
-	int simulation_lenght = 1000000;
+	int simulation_lenght = 10000;
 	
 
 	int nb_simuls= 1;
-	int time_before_measure = 3000;
+	int time_before_measure = 0;
 
 
 	//Generation of best effort parameters

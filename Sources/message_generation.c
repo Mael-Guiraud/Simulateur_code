@@ -178,8 +178,9 @@ void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode,int ** nodes
 
 			break;
 			case SPLIT_FREQ:
+			/*
 				 offset =ring_size;
-				 current_freq = 1;
+				 current_freq = 0;
 				 first = 0;
 				for(int j =0;j<antena_id;j++)
 				{
@@ -200,12 +201,39 @@ void init_CRAN(int* antenas,int period, int nb_antenas, Policy mode,int ** nodes
 					}
 				}
 			
-				antenas[i] = (current_freq*2 - (nodes_positions[node_id][0] -1) +  offset +period)%period; 
+				antenas[i] = (current_freq  - nodes_positions[node_id][0]  +  offset +period)%period; 
 				if( (offset+ emission_time) <= period)
 					shift[node_id][i] = emission_time;
 				else
 					shift[node_id][i] = period-offset;
-				printf("Antenna %d offset %d node[i] %d current_freq %d shift %d nodeid %d\n",antena_id,offset,antenas[i],current_freq,shift[node_id][i],node_id);
+				printf("Antenna %d offset %d node[i] %d current_freq %d shift %d nodeid %d distance %d \n",antena_id,offset,antenas[i],current_freq,shift[node_id][i],node_id, nodes_positions[node_id][0]);
+				*/
+				switch(antena_id)
+				{
+					case 0:
+						antenas[i] = 20;
+						shift[node_id][i] = 500 ;
+					break;
+
+					case 1:
+						antenas[i] = 540;
+						shift[node_id][i] = 400 ;
+					break;
+					case 2:
+						antenas[i] = 162;
+						shift[node_id][i] = 500 ;
+					break;
+					case 3:
+						antenas[i] = 682;
+						shift[node_id][i] = 300 ;
+					break;
+					case 4:
+						antenas[i] = 224;
+						shift[node_id][i] = 500 ;
+					break;
+
+				}
+				
 			break;
 			default:
 				antenas[i]= rand()%period;
@@ -305,7 +333,7 @@ void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_ant
 				case SPLIT_FREQ:
 					;	
 					int k;
-					/*for(k=0;k<shift[i][j];k+=emission_gap)
+					for(k=0;k<shift[i][j];k+=emission_gap)
 					{
 						
 						if( (nodes_antenas[i][j]+k)%period == current_slot%period)
@@ -320,11 +348,11 @@ void generation_CRAN(Queue* CRAN_Q,int** nodes_antenas, int nb_nodes, int nb_ant
 							
 							
 						}
-					}*/
-					for(k=0;k<emission_time;k+= emission_gap)
+					}
+					for(;k<emission_time;k+= emission_gap)
 					{
 						
-						if( (nodes_antenas[i][j]+k)%period == current_slot%period)
+						if( (nodes_antenas[i][j]+k+2)%period == current_slot%period)
 						{
 							
 							CRAN_Q[i].size += size_CRAN;
@@ -384,7 +412,7 @@ void generation_answers(Packet* ring, int** nodes_positions, Queue* CRAN_Q, int 
 						CRAN_Q[i].kind[CRAN_Q[i].max_id] = 3; 
 
 						CRAN_Q[i].max_id= (CRAN_Q[i].max_id+1)%max_size;
-						if(DEBUG)printf("Creating Answer to %d on queue %d at date %d  (max id = %d)\n ",ring[reading_slot].owner,i,current_slot,CRAN_Q[i].max_id);
+						//printf("Creating Answer to %d on queue %d at date %d  (max id = %d)\n ",ring[reading_slot].owner,i,current_slot,CRAN_Q[i].max_id);
 					}
 				}
 				else
@@ -423,15 +451,36 @@ void reservation_management(Packet* ring, int ring_size, int** nodes_antenas, in
 				if( (nodes_antenas[i][j] - ring_size + k+nodes_positions[i][0]-1)%period == current_slot%period)
 				{
 					ring[0].reserved_for = 0;
+					
+					printf("%d reserve for 0 at date %d (k = %d)\n",i,current_slot,k);
 				}
 				if( (nodes_antenas[i][j]+k - ring_size + period)%period == current_slot%period)
 				{
 					ring[writing_Slot].reserved_for = i;
+					
+					printf("%d reserve for itself at date %d (k = %d)\n",i,current_slot,k);
 				}
 			}
 			switch(mode)
 			{
-				case SPLIT_FREQ: ;
+				case SPLIT_FREQ: 
+
+					if(shift[i][j] != emission_time)
+						for(k=0;k<ring_size;k+=emission_gap)
+						{
+							if( (nodes_antenas[i][j]+shift[i][j]- ring_size+k+2+nodes_positions[i][0]-1)%period == current_slot%period)
+							{
+								ring[0].reserved_for = 0;
+								printf("%d reserve for 0 at date %d (k = %d, split freq)\n",i,current_slot,k);
+							}
+							if( (nodes_antenas[i][j]+shift[i][j]- ring_size+k+2)%period == current_slot%period)
+							{
+
+								ring[writing_Slot].reserved_for = i;
+								printf("%d reserve for itself at date %d (k = %d, splitfreq)\n",i,current_slot,k);
+							}
+						}
+					/*
 					if(shift[i][j] == emission_time) // pas de split, comportement normal
 					{
 						//printf("node %d comportement normal \n",i);
@@ -450,6 +499,7 @@ void reservation_management(Packet* ring, int ring_size, int** nodes_antenas, in
 					}
 					else
 					{
+					
 						//printf("Antenne %d du noeud %d on a des slots rervés pendant %d \n",j,i,shift[i][j]);
 						for(k=0;k<shift[i][j]-ring_size;k+=emission_gap) // comportement normal jusqu'a shift
 						{
@@ -462,6 +512,8 @@ void reservation_management(Packet* ring, int ring_size, int** nodes_antenas, in
 								ring[writing_Slot].reserved_for = i;
 							}
 						}
+
+						
 						for(;k<shift[i][j];k+=emission_gap)// on libere sur les derniers slots mais on reserve les autres
 						{
 						
@@ -479,7 +531,9 @@ void reservation_management(Packet* ring, int ring_size, int** nodes_antenas, in
 					
 						
 					}
+					*/
 				break;
+				/*
 				default:
 					for(k=0;k<emission_time-ring_size;k+=emission_gap)
 					{
@@ -494,6 +548,7 @@ void reservation_management(Packet* ring, int ring_size, int** nodes_antenas, in
 					}
 					
 				break;
+				*/
 			}
 		}
 	}
@@ -511,10 +566,12 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 	{
 		writing_Slot = nodes_positions[0][i];
 		packet_created_size = 0;
-		/*if(CRAN_Q[i].size>0)
+		if(i==0)
 		{
-			printf("node %d date %d owner %d  reserved for %d \n",i,current_slot,ring[writing_Slot].owner,ring[writing_Slot].reserved_for);
-		}*/
+			printf("%d [%d %d %d] [%d %d %d] %d \n",current_slot,ring[99].reserved_for,ring[99].owner,ring[99].nb_CRAN,ring[writing_Slot].reserved_for,ring[writing_Slot].owner,ring[0].nb_CRAN,CRAN_Q[i].size);
+			
+		}
+
 		//printf(" We are at node %d, the slot is reserved for %d, used by %d and i have %d CRAN in queu\n",i,ring[writing_Slot].reserved_for,ring[writing_Slot].owner,CRAN_Q[i].size);
 		/*if(ring[writing_Slot].reserved_for == i && CRAN_Q[i].size == 0 )
 			printf("PB mon gars");*/
@@ -617,14 +674,15 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 									if(i<nb_BBU)
 									{
 										tab_CRAN[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
-										//printf("BBU %d \n",current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]);
+										printf("BBU %d \n",current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]);
 									}
 									else
 									{
 										tab_CRAN[current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]]++;
-										//printf("RRH[%d] %d (date %d)\n",i,current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id],current_slot);
-										if(current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id] > 2)
+										printf("RRH[%d] %d (date %d)\n",i,current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id],current_slot);
+										if(current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id] > 0)
 										{
+											printf("%d \n",current_slot-CRAN_Q[i].queue[CRAN_Q[i].min_id]);
 											exit(45);
 										}
 									}
@@ -675,7 +733,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 							BE_Q[i].min_id= (BE_Q[i].min_id+1)%max_size;	
 							
 							BE_Q[i].size -= size_BE;
-							ring[writing_Slot].reserved_for = -1;
+							
 							
 						}
 						else
@@ -683,7 +741,7 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 							if (ring[writing_Slot].reserved_for == i)
 							{
 								inserted++;
-								
+
 							}
 						}
 
@@ -696,8 +754,8 @@ int insert_packets(Queue* BE_Q, Queue * CRAN_Q, Packet* ring, int** nodes_positi
 
 			if( CRAN_Q[i].size >0)
 			{
-				if(DEBUG)printf("%d essaye d'inserer mais il ne peut pas a la date %d (%d %d) (%d) \n",i,current_slot,ring[writing_Slot].owner,ring[writing_Slot].reserved_for,ring[writing_Slot].nb_CRAN);
-		
+				printf("%d essaye d'inserer mais il ne peut pas a la date %d (%d %d) (%d) \n",i,current_slot,ring[writing_Slot].owner,ring[writing_Slot].reserved_for,ring[writing_Slot].nb_CRAN);
+				//exit(55);
 			}
 			
 		}
